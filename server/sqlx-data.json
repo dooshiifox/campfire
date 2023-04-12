@@ -1,0 +1,19 @@
+{
+  "db": "PostgreSQL",
+  "c594d495a33f41a9d3a3fd7cee6cfd96a849b0a794f1869f7673628a8e253c16": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Varchar",
+          "Int2",
+          "Bpchar",
+          "Varchar"
+        ]
+      }
+    },
+    "query": "INSERT INTO users (id, username, discrim, phc, email) VALUES ($1, $2, $3, $4, $5)"
+  }
+}
