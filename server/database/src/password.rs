@@ -1,7 +1,7 @@
 use argon2::PasswordVerifier;
 
 /// Returns the global pepper secret
-pub fn secret() -> Vec<u8> {
+pub(crate) fn secret() -> Vec<u8> {
     use base64::Engine;
 
     // Read the secret from the env and parse from b64 to [u8]
@@ -69,6 +69,17 @@ impl<'pw> Password<'pw> {
         .expect("dam that secret is long")
         .verify_password(self.password.as_bytes(), &expected_hash)
         .is_ok()
+    }
+}
+
+impl<'pw> From<&'pw str> for Password<'pw> {
+    fn from(password: &'pw str) -> Self {
+        Self::new(password)
+    }
+}
+impl<'pw> From<&'pw String> for Password<'pw> {
+    fn from(password: &'pw String) -> Self {
+        Self::new(password)
     }
 }
 

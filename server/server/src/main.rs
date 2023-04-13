@@ -1,29 +1,38 @@
-#![feature(negative_impls)]
-#![feature(auto_traits)]
-#![feature(try_trait_v2)]
-#![feature(never_type)]
-#![feature(try_trait_v2_yeet)]
-
-pub mod database;
 pub mod prelude;
 mod v1;
 
 use crate::prelude::*;
 use actix_web::{App, HttpServer};
+use tokio::sync::Mutex;
+
+#[derive(Deref, DerefMut)]
+pub struct UserSnowflakeGen(pub snowflake::SnowflakeGenerator);
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenvy::from_path(std::path::Path::new(".env")).unwrap();
     let _guard = init_tracing(); // Hold file guard until end of program
 
-    let pool = database::new_pool().await;
+    let pool = Data::new(DbPool(database::new_pool().await));
 
+    let machine_id = dotenvy::var("MACHINE_ID")
+        .expect("MACHINE_ID env var not set.")
+        .parse::<u16>()
+        .unwrap();
+    let user_snowflake_gen = Data::new(Mutex::new(UserSnowflakeGen(
+        snowflake::SnowflakeGenerator::new(machine_id),
+    )));
+
+    let ip = "127.0.0.1";
+    let port = 8080;
+    info!("Starting server on {ip}:{port}");
     HttpServer::new(move || {
         App::new()
-            .app_data(web::Data::new(DbPool(pool.clone())))
+            .app_data(pool.clone())
+            .app_data(user_snowflake_gen.clone())
             .service(web::scope("/v1").configure(v1::init_routes))
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind((ip, port))?
     .run()
     .await
 }

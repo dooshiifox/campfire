@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS users (
 
     username varchar(255) NOT NULL,
     discrim smallint NOT NULL,
-    phc char(255) NOT NULL,
+    phc varchar(255) NOT NULL,
     email varchar(255) UNIQUE NOT NULL,
     
     -- Nullable because the user may not have a profile image
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS accessToken (
-    token char(255) UNIQUE NOT NULL,
+    token varchar(255) UNIQUE NOT NULL,
     user_id bigint NOT NULL,
     expires_at bigint NOT NULL,
     

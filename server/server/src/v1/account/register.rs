@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, UserSnowflakeGen};
 
 #[derive(Deserialize, Debug)]
 pub struct RegisterParams {
@@ -30,17 +30,23 @@ const COMMON_PASSWORD: &'static str = "CommonPassword";
 const SIMILAR_USERNAME: &'static str = "SimilarUsername";
 /// The password is too similar to the email address
 const SIMILAR_EMAIL: &'static str = "SimilarEmail";
+/// Internal server error
+const INTERNAL_SERVER_ERROR: &'static str = "ISE";
 
 #[post("/register")]
-pub async fn register(req: web::Json<RegisterParams>, db: web::Data<DbPool>) -> impl Responder {
+pub async fn register(
+    req: Json<RegisterParams>,
+    user_sfgen: Data<Mutex<UserSnowflakeGen>>,
+    db: Data<DbPool>,
+) -> impl Responder {
     let params = req.into_inner();
 
     if !validation::validate_username(&params.username) {
-        return err!(INVALID_USERNAME map!{ hi => 1, bye => 2 });
+        return err!(INVALID_USERNAME);
     }
 
     if !validation::validate_email(&params.email) {
-        return err!(INVALID_EMAIL 5);
+        return err!(INVALID_EMAIL);
     }
 
     // Validate the password
@@ -56,8 +62,28 @@ pub async fn register(req: web::Json<RegisterParams>, db: web::Data<DbPool>) -> 
         };
     };
 
-    let hashed_password = password.generate();
-    info!("{hashed_password}");
-
-    ok!("1")
+    let user_id = { user_sfgen.lock().await.generate() };
+    match db
+        .user()
+        .register(user_id, &params.username, password, &params.email)
+        .await
+    {
+        Ok(()) => ok!(format!("Created u:{user_id}")),
+        Err(user::NewUserError::AllDiscriminatorsUsed) => err!(USERNAME_TAKEN),
+        Err(user::NewUserError::EmailTaken) => err!(EMAIL_TAKEN),
+        Err(user::NewUserError::NotInserted) => {
+            warn!(
+                "Register error: User not inserted into database: {user_id} / {} / {}",
+                params.username, params.email
+            );
+            err!(StatusCode::INTERNAL_SERVER_ERROR => INTERNAL_SERVER_ERROR)
+        }
+        Err(user::NewUserError::DatabaseError(e)) => {
+            error!(
+                "Register error: Database error: {} / {user_id} / {} / {}",
+                e, params.username, params.email
+            );
+            err!(StatusCode::INTERNAL_SERVER_ERROR => INTERNAL_SERVER_ERROR)
+        }
+    }
 }

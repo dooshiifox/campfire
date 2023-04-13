@@ -1,4 +1,6 @@
+pub mod orm;
 pub mod password;
+pub mod prelude;
 pub mod snowflake;
 pub mod validation;
 
@@ -14,25 +16,8 @@ impl std::ops::Deref for DbPool {
 }
 
 impl DbPool {
-    pub async fn new_user(
-        &self,
-        id: Snowflake,
-        username: &str,
-        discrim: i16,
-        phc: &str,
-        email: &str,
-    ) -> Result<(), sqlx::Error> {
-        sqlx::query!(
-            "INSERT INTO users (id, username, discrim, phc, email) VALUES ($1, $2, $3, $4, $5)",
-            id.into_number(),
-            username,
-            discrim,
-            phc,
-            email
-        )
-        .execute(&self.0)
-        .await?;
-        Ok(())
+    pub fn user(&self) -> user::User {
+        user::User { conn: &self.0 }
     }
 }
 

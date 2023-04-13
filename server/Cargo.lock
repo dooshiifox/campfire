@@ -551,6 +551,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "database"
+version = "0.1.0"
+dependencies = [
+ "argon2",
+ "base64 0.21.0",
+ "chrono",
+ "dotenvy",
+ "password-hash",
+ "rand",
+ "serde",
+ "sqlx",
+ "thiserror",
+ "tracing",
+]
+
+[[package]]
+name = "de-ref"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8ff8c778cbe6a5ea39a48a399c50095109b4c3fc93f1855d30cb12bc1f55f626"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "derive_more"
 version = "0.99.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1549,12 +1576,12 @@ dependencies = [
  "actix-web",
  "argon2",
  "base64 0.21.0",
- "chrono",
+ "database",
+ "de-ref",
  "dotenvy",
  "password-hash",
  "rand",
  "serde",
- "sqlx",
  "thiserror",
  "tokio",
  "tracing",
