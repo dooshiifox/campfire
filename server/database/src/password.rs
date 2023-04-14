@@ -1,7 +1,7 @@
 use argon2::PasswordVerifier;
 
 /// Returns the global pepper secret
-pub(crate) fn secret() -> Vec<u8> {
+fn secret() -> Vec<u8> {
     use base64::Engine;
 
     // Read the secret from the env and parse from b64 to [u8]

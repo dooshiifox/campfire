@@ -15,10 +15,10 @@ CREATE TABLE IF NOT EXISTS users (
     PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS accessToken (
-    token varchar(255) UNIQUE NOT NULL,
+CREATE TABLE IF NOT EXISTS access_tokens (
+    token bigint UNIQUE NOT NULL,
     user_id bigint NOT NULL,
-    expires_at bigint NOT NULL,
+    created_at bigint NOT NULL,
     
     PRIMARY KEY (token),
     FOREIGN KEY (user_id) REFERENCES users (id)

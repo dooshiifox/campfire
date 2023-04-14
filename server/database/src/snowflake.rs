@@ -1,8 +1,5 @@
-use std::hash::Hash;
-
 use crate::prelude::*;
-
-pub const DB_EPOCH: i64 = 1672531200000;
+use std::hash::Hash;
 
 /// A snowflake ID generator.
 ///
@@ -25,6 +22,11 @@ pub struct SnowflakeGenerator {
     increment_overflow: u16,
 }
 impl SnowflakeGenerator {
+    /// Creates a new snowflake generator.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `machine_id >= 1024`.
     pub fn new(machine_id: u16) -> Self {
         if machine_id > 0b1111111111 {
             panic!("machine_id must be less than 1024");
@@ -40,7 +42,7 @@ impl SnowflakeGenerator {
 
     /// Generates a new snowflake ID.
     pub fn generate(&mut self) -> Snowflake {
-        let mut timestamp = (chrono::Utc::now().timestamp_millis() - DB_EPOCH) as u64;
+        let mut timestamp = time::now() as u64;
 
         // Milliseconds have increased
         // Either reset the increment or decrement the overflow.
@@ -89,6 +91,7 @@ pub struct Snowflake {
     increment: u16,
 }
 impl Snowflake {
+    /// Creates a new [`Snowflake`] from a number.
     pub fn from_number(number: i64) -> Self {
         Self {
             timestamp: (number >> 21) as u64,
@@ -97,12 +100,14 @@ impl Snowflake {
         }
     }
 
+    /// Returns the snowflake as an i64.
     pub fn into_number(&self) -> i64 {
         ((self.timestamp as i64) << 21) | ((self.machine_id as i64) << 11) | (self.increment as i64)
     }
 
+    /// Returns the timestamp of the snowflake.
     pub fn timestamp(&self) -> std::time::SystemTime {
-        std::time::UNIX_EPOCH + std::time::Duration::from_millis(self.timestamp + DB_EPOCH as u64)
+        time::into_systime(self.timestamp)
     }
 }
 impl std::fmt::Display for Snowflake {
@@ -128,5 +133,15 @@ impl Hash for Snowflake {
 impl Serialize for Snowflake {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         serializer.serialize_i64(self.into_number())
+    }
+}
+impl From<Snowflake> for i64 {
+    fn from(snowflake: Snowflake) -> Self {
+        snowflake.into_number()
+    }
+}
+impl From<i64> for Snowflake {
+    fn from(number: i64) -> Self {
+        Self::from_number(number)
     }
 }

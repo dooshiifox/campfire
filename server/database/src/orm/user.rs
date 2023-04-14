@@ -1,9 +1,7 @@
+use crate::prelude::*;
 use std::collections::HashSet;
 
-use rand::seq::IteratorRandom;
-
-use crate::prelude::*;
-
+/// An interface for interacting with the `users` table of the database.
 pub struct User<'a> {
     pub(crate) conn: &'a sqlx::Pool<sqlx::Postgres>,
 }
@@ -29,6 +27,7 @@ pub enum LoginError {
 }
 
 impl<'a> User<'a> {
+    /// Registers a user's account.
     pub async fn register<'pw, P: Into<password::Password<'pw>>>(
         &self,
         id: Snowflake,
@@ -87,13 +86,13 @@ impl<'a> User<'a> {
         }
     }
 
+    /// Logs a user in with their email and password and returns their ID.
     pub async fn login<'pw, P: Into<password::Password<'pw>>>(
         &self,
         email: &str,
         password: P,
     ) -> Result<Snowflake, LoginError> {
         let user = {
-            #[derive(Debug)]
             struct LoginDetails {
                 id: i64,
                 phc: String,
@@ -109,8 +108,10 @@ impl<'a> User<'a> {
             .ok_or(LoginError::InvalidCredentials)?
         };
 
+        // TODO: Update password if changed (due to encryption method changing)
+
         if password.into().verify(&user.phc) {
-            Ok(Snowflake::from_number(user.id))
+            Ok(user.id.into())
         } else {
             Err(LoginError::InvalidCredentials)
         }

@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::v1::prelude::*;
 
 mod login;
 mod register;

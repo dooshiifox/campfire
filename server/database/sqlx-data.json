@@ -1,0 +1,119 @@
+{
+  "db": "PostgreSQL",
+  "03fb0a0e641e7da682049fb341dad21d021497e009598b9d131754a15725a8d1": {
+    "describe": {
+      "columns": [
+        {
+          "name": "discrim",
+          "ordinal": 0,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT discrim FROM users WHERE username = $1"
+  },
+  "1860915af47291fe425dd536ade0db4b8b18bc6083efcb685152ca5f740456bb": {
+    "describe": {
+      "columns": [
+        {
+          "name": "exists",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)"
+  },
+  "25b341e938ec59edb4bc161f90cb7da01e4da7d035801255783b7b814dcadecb": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user_id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT user_id FROM access_tokens WHERE token = $1"
+  },
+  "2e29f4629b1637665a6c11a073e48201518dcc0450805f1e0c189dd1a4a28f11": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "INSERT INTO access_tokens (token, user_id, created_at) VALUES ($1, $2, $3)"
+  },
+  "4b9e680895f80f59cf7b07a333da07cdd89277d6746667dd0a58dd45bf99a50a": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "phc",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT id, phc FROM users WHERE email = $1"
+  },
+  "c594d495a33f41a9d3a3fd7cee6cfd96a849b0a794f1869f7673628a8e253c16": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Varchar",
+          "Int2",
+          "Varchar",
+          "Varchar"
+        ]
+      }
+    },
+    "query": "INSERT INTO users (id, username, discrim, phc, email) VALUES ($1, $2, $3, $4, $5)"
+  }
+}

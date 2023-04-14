@@ -3,6 +3,3 @@ members = [
     "database",
     "server"
 ]
-
-[profile.dev.package.sqlx-macros]
-opt-level = 3

@@ -1,6 +1,8 @@
 mod account;
+pub mod authentication;
+pub mod prelude;
 
-use crate::prelude::*;
+use crate::v1::prelude::*;
 use actix_web::HttpResponseBuilder;
 use std::fmt::Debug;
 
@@ -57,42 +59,35 @@ impl<T: Serialize> Serialize for ApiSuccess<T> {
     }
 }
 
-#[get("/")]
-async fn index() -> impl Responder {
-    format!("Hello!")
+#[get("/", wrap = "AuthMiddleware")]
+async fn index(session: Session) -> impl Responder {
+    format!("Hello! {}", session.user_id)
 }
-
-pub const JSON_PAYLOAD_TOO_LARGE: &'static str = "JSON:PayloadTooLarge";
-pub const JSON_INVALID_CONTENT_TYPE: &'static str = "JSON:InvalidContentType";
-pub const JSON_DESERIALIZE_ERROR: &'static str = "JSON:UnknownDeserializeError";
-pub const JSON_SERIALIZE_ERROR: &'static str = "JSON:UnknownSerializeError";
-pub const JSON_READING_PAYLOAD_ERROR: &'static str = "JSON:UnknownErrorReadingPayload";
-pub const MISC_JSON_ERROR: &'static str = "JSON:UnknownError";
 
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
     let json_config = web::JsonConfig::default()
         .limit(4096)
         .error_handler(|err, _req| match err {
             actix_web::error::JsonPayloadError::OverflowKnownLength { length, limit } => {
-                actix_err!(StatusCode::PAYLOAD_TOO_LARGE => JSON_PAYLOAD_TOO_LARGE map!{ length => length, limit => limit })
+                actix_err!(PAYLOAD_TOO_LARGE => JSON_PAYLOAD_TOO_LARGE map!{ length, limit })
             }
             actix_web::error::JsonPayloadError::Overflow { limit } => {
-                actix_err!(StatusCode::PAYLOAD_TOO_LARGE => JSON_PAYLOAD_TOO_LARGE map!{ limit => limit })
+                actix_err!(PAYLOAD_TOO_LARGE => JSON_PAYLOAD_TOO_LARGE map!{ limit })
             }
             actix_web::error::JsonPayloadError::ContentType => {
-                actix_err!(StatusCode::UNSUPPORTED_MEDIA_TYPE => JSON_INVALID_CONTENT_TYPE)
+                actix_err!(UNSUPPORTED_MEDIA_TYPE => JSON_INVALID_CONTENT_TYPE)
             }
             actix_web::error::JsonPayloadError::Deserialize(e) => {
-                actix_err!(StatusCode::BAD_REQUEST => JSON_DESERIALIZE_ERROR e.to_string())
+                actix_err!(BAD_REQUEST => JSON_DESERIALIZE_ERROR e.to_string())
             }
             actix_web::error::JsonPayloadError::Serialize(e) => {
-                actix_err!(StatusCode::INTERNAL_SERVER_ERROR => JSON_SERIALIZE_ERROR e.to_string())
+                actix_err!(INTERNAL_SERVER_ERROR => JSON_SERIALIZE_ERROR e.to_string())
             }
             actix_web::error::JsonPayloadError::Payload(e) => {
-                actix_err!(StatusCode::INTERNAL_SERVER_ERROR => JSON_READING_PAYLOAD_ERROR e.to_string())
+                actix_err!(INTERNAL_SERVER_ERROR => JSON_READING_PAYLOAD_ERROR e.to_string())
             }
             _ => {
-                actix_err!(StatusCode::INTERNAL_SERVER_ERROR => MISC_JSON_ERROR)
+                actix_err!(INTERNAL_SERVER_ERROR => MISC_JSON_ERROR)
             }
         });
 

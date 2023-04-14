@@ -1,4 +1,4 @@
-use crate::{prelude::*, UserSnowflakeGen};
+use crate::v1::prelude::*;
 
 #[derive(Deserialize, Debug)]
 pub struct RegisterParams {
@@ -30,8 +30,6 @@ const COMMON_PASSWORD: &'static str = "CommonPassword";
 const SIMILAR_USERNAME: &'static str = "SimilarUsername";
 /// The password is too similar to the email address
 const SIMILAR_EMAIL: &'static str = "SimilarEmail";
-/// Internal server error
-const INTERNAL_SERVER_ERROR: &'static str = "ISE";
 
 #[post("/register")]
 pub async fn register(
@@ -76,14 +74,14 @@ pub async fn register(
                 "Register error: User not inserted into database: {user_id} / {} / {}",
                 params.username, params.email
             );
-            err!(StatusCode::INTERNAL_SERVER_ERROR => INTERNAL_SERVER_ERROR)
+            err!(INTERNAL_SERVER_ERROR => ISE)
         }
         Err(user::NewUserError::DatabaseError(e)) => {
             error!(
                 "Register error: Database error: {} / {user_id} / {} / {}",
                 e, params.username, params.email
             );
-            err!(StatusCode::INTERNAL_SERVER_ERROR => INTERNAL_SERVER_ERROR)
+            err!(INTERNAL_SERVER_ERROR => ISE)
         }
     }
 }
