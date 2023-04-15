@@ -46,12 +46,10 @@ CREATE TABLE IF NOT EXISTS roles (
     permission_mask bigint NOT NULL,
     
     -- Linked list to sort this role's position in the hierarchy
-    prev bigint DEFAULT NULL,
     next bigint DEFAULT NULL,
     
     PRIMARY KEY (id),
     FOREIGN KEY (guild_id) REFERENCES guilds (id),
-    FOREIGN KEY (prev) REFERENCES roles (id),
     FOREIGN KEY (next) REFERENCES roles (id)
 );
 
@@ -62,12 +60,10 @@ CREATE TABLE IF NOT EXISTS channels (
     guild_id bigint NOT NULL,
 
     -- Linked list to sort this channel's position in the hierarchy
-    prev bigint DEFAULT NULL,
     next bigint DEFAULT NULL,
     
     PRIMARY KEY (id),
     FOREIGN KEY (guild_id) REFERENCES guilds (id),
-    FOREIGN KEY (prev) REFERENCES channels (id),
     FOREIGN KEY (next) REFERENCES channels (id)
 );
 
@@ -91,13 +87,11 @@ CREATE TABLE IF NOT EXISTS guild_members (
     user_id bigint NOT NULL,
 
     -- Linked list to sort where the user placed this guild on the sidebar
-    prev bigint DEFAULT NULL,
     next bigint DEFAULT NULL,
     
     PRIMARY KEY (id),
     FOREIGN KEY (guild_id) REFERENCES guilds (id),
     FOREIGN KEY (user_id) REFERENCES users (id),
-    FOREIGN KEY (prev) REFERENCES guild_members (id),
     FOREIGN KEY (next) REFERENCES guild_members (id)
 );
 

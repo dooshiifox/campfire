@@ -1,8 +1,9 @@
+pub mod logger;
 pub mod prelude;
 mod v1;
 
-use crate::prelude::*;
-use actix_web::{middleware::Logger, App, HttpServer};
+use crate::{logger::Logger, prelude::*};
+use actix_web::{middleware::NormalizePath, App, HttpServer};
 use tokio::sync::Mutex;
 
 #[derive(Deref, DerefMut)]
@@ -30,8 +31,11 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(pool.clone())
             .app_data(user_snowflake_gen.clone())
-            .wrap(Logger::default())
             .service(web::scope("/v1").configure(v1::init_routes))
+            .wrap(Logger::new(
+                "From %a with %{User-Agent}i | %r => Took %Dms with %s status and %b bytes",
+            ))
+            .wrap(NormalizePath::trim())
     })
     .bind((ip, port))?
     .run()

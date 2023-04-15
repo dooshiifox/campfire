@@ -20,6 +20,22 @@
     },
     "query": "SELECT discrim FROM users WHERE username = $1"
   },
+  "0b989dea7102d80b89cf59a613f1fdf4ceba930b06bcda0bcd7b0cff5cf53abd": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8",
+          "Varchar",
+          "Int8"
+        ]
+      }
+    },
+    "query": "INSERT INTO messages (id, channel_id, author_id, content, updated_at) VALUES ($1, $2, $3, $4, $5)"
+  },
   "1860915af47291fe425dd536ade0db4b8b18bc6083efcb685152ca5f740456bb": {
     "describe": {
       "columns": [
@@ -100,6 +116,68 @@
     },
     "query": "SELECT id, phc FROM users WHERE email = $1"
   },
+  "4c68fbc67c35ab0c89caec170918d5f994e6102ca2d65ab4f7b9114b5e6cf42d": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "INSERT INTO guild_members (id, guild_id, user_id) VALUES ($1, $2, $3)"
+  },
+  "748e5fcaca9478abac4f88249e9f5def60c3801c936751b8ec2ff94f3c919a54": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "UPDATE channels SET next = $1 WHERE next = $2 AND id != $3"
+  },
+  "962f4ae79bf3e10d96a5b5c0b7a3e66bf56087581455f113527aa8fd22c83422": {
+    "describe": {
+      "columns": [
+        {
+          "name": "exists",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT EXISTS(SELECT 1 FROM channels WHERE id = $1 AND guild_id = $2)"
+  },
+  "985bccb6c7f19c88c3eefc545f321c910b9bd95d721ea8c03ef30bbafc592daf": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "UPDATE guild_members SET next = $1 WHERE next IS NULL AND user_id = $2"
+  },
   "c594d495a33f41a9d3a3fd7cee6cfd96a849b0a794f1869f7673628a8e253c16": {
     "describe": {
       "columns": [],
@@ -115,5 +193,34 @@
       }
     },
     "query": "INSERT INTO users (id, username, discrim, phc, email) VALUES ($1, $2, $3, $4, $5)"
+  },
+  "cd0dada5a2d8c1d541bd4ededd40baa474c00cda9ff7333595fa7eb93198f027": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Varchar",
+          "Int8"
+        ]
+      }
+    },
+    "query": "INSERT INTO channels (id, guild_id, name, next) VALUES ($1, $2, $3, $4)"
+  },
+  "e643301bc311481e9ce06d40a8f4bb857e4ebacd45379b8b5a062bfbcf31d9c8": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Varchar"
+        ]
+      }
+    },
+    "query": "INSERT INTO guilds (id, owner_id, name) VALUES ($1, $2, $3)"
   }
 }

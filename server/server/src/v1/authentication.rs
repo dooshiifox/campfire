@@ -79,7 +79,7 @@ where
                 Err(access_token::CheckError::InvalidToken) => {
                     return Err(actix_err!(UNAUTHORIZED => INVALID_AUTH_TOKEN))
                 }
-                Err(access_token::CheckError::JwtDecoding(err)) => {
+                Err(access_token::CheckError::JwtDecoding(_)) => {
                     return Err(actix_err!(UNAUTHORIZED => BAD_AUTH_TOKEN "Could not decode JWT"));
                 }
                 Err(access_token::CheckError::DatabaseError(err)) => {

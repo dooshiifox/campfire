@@ -31,7 +31,6 @@ const SIMILAR_USERNAME: &'static str = "SimilarUsername";
 /// The password is too similar to the email address
 const SIMILAR_EMAIL: &'static str = "SimilarEmail";
 
-#[post("/register")]
 pub async fn register(
     req: Json<RegisterParams>,
     user_sfgen: Data<Mutex<UserSnowflakeGen>>,

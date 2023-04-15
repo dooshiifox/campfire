@@ -1,5 +1,5 @@
 pub use crate::{
-    orm::{access_token, user},
+    orm::{access_token, channel, guild, message, user},
     password,
     snowflake::{self, Snowflake},
     time, validation, DbPool,

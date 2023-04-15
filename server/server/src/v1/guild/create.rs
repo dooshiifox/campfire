@@ -18,7 +18,7 @@ pub struct LoginResponse {
 /// The email or password is invalid
 const INVALID_CREDENTIALS: &'static str = "InvalidCredentials";
 
-pub async fn login(req: Json<LoginParams>, db: Data<DbPool>) -> impl Responder {
+pub async fn create(req: Json<LoginParams>, db: Data<DbPool>) -> impl Responder {
     let params = req.into_inner();
 
     let id = match db.user().login(&params.email, &params.password).await {

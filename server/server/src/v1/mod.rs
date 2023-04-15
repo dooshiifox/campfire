@@ -1,5 +1,6 @@
 mod account;
 pub mod authentication;
+mod guild;
 pub mod prelude;
 
 use crate::v1::prelude::*;
@@ -59,7 +60,6 @@ impl<T: Serialize> Serialize for ApiSuccess<T> {
     }
 }
 
-#[get("/", wrap = "AuthMiddleware")]
 async fn index(session: Session) -> impl Responder {
     format!("Hello! {}", session.user_id)
 }
@@ -91,7 +91,31 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
             }
         });
 
-    cfg.app_data(json_config)
-        .service(index)
-        .service(web::scope("/account").configure(account::init_routes));
+    cfg.app_data(json_config);
+
+    cfg.default_service(web::route().to(|| async {
+        #[allow(unused_mut)]
+        let mut vec: Vec<String> = Vec::new();
+        vec.push(stringify!(get).to_string().to_uppercase());
+        err!(NOT_FOUND => NOT_FOUND "Check your spelling!")
+    }));
+    route!(cfg: {
+        get => (:(AuthMiddleware) index),
+        "/account" => {
+            get => (:(AuthMiddleware) index),
+            "/login" => {
+                get => (:(AuthMiddleware) index),
+                post => (account::login::login),
+            },
+            "/register" => {
+                post => (account::register::register),
+            },
+        },
+        "/guild" => {
+            "/create" => {
+                post => (guild::create::create),
+            },
+            get => (guild::get_guilds),
+        },
+    });
 }
