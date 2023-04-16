@@ -1,6 +1,7 @@
+mod api;
 pub mod logger;
+mod macros;
 pub mod prelude;
-mod v1;
 
 use crate::{logger::Logger, prelude::*};
 use actix_web::{middleware::NormalizePath, App, HttpServer};
@@ -8,6 +9,18 @@ use tokio::sync::Mutex;
 
 #[derive(Deref, DerefMut)]
 pub struct UserSnowflakeGen(pub snowflake::SnowflakeGenerator);
+#[derive(Deref, DerefMut)]
+pub struct GuildSnowflakeGen(pub snowflake::SnowflakeGenerator);
+#[derive(Deref, DerefMut)]
+pub struct RoleSnowflakeGen(pub snowflake::SnowflakeGenerator);
+#[derive(Deref, DerefMut)]
+pub struct ChannelSnowflakeGen(pub snowflake::SnowflakeGenerator);
+#[derive(Deref, DerefMut)]
+pub struct MessageSnowflakeGen(pub snowflake::SnowflakeGenerator);
+#[derive(Deref, DerefMut)]
+pub struct GuildMemberSnowflakeGen(pub snowflake::SnowflakeGenerator);
+#[derive(Deref, DerefMut)]
+pub struct GuildMemberRoleSnowflakeGen(pub snowflake::SnowflakeGenerator);
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -20,7 +33,26 @@ async fn main() -> std::io::Result<()> {
         .expect("MACHINE_ID env var not set.")
         .parse::<u16>()
         .unwrap();
+
     let user_snowflake_gen = Data::new(Mutex::new(UserSnowflakeGen(
+        snowflake::SnowflakeGenerator::new(machine_id),
+    )));
+    let guild_snowflake_gen = Data::new(Mutex::new(GuildSnowflakeGen(
+        snowflake::SnowflakeGenerator::new(machine_id),
+    )));
+    let role_snowflake_gen = Data::new(Mutex::new(RoleSnowflakeGen(
+        snowflake::SnowflakeGenerator::new(machine_id),
+    )));
+    let channel_snowflake_gen = Data::new(Mutex::new(ChannelSnowflakeGen(
+        snowflake::SnowflakeGenerator::new(machine_id),
+    )));
+    let message_snowflake_gen = Data::new(Mutex::new(MessageSnowflakeGen(
+        snowflake::SnowflakeGenerator::new(machine_id),
+    )));
+    let guild_member_snowflake_gen = Data::new(Mutex::new(GuildMemberSnowflakeGen(
+        snowflake::SnowflakeGenerator::new(machine_id),
+    )));
+    let guild_member_role_snowflake_gen = Data::new(Mutex::new(GuildMemberRoleSnowflakeGen(
         snowflake::SnowflakeGenerator::new(machine_id),
     )));
 
@@ -31,7 +63,13 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(pool.clone())
             .app_data(user_snowflake_gen.clone())
-            .service(web::scope("/v1").configure(v1::init_routes))
+            .app_data(guild_snowflake_gen.clone())
+            .app_data(role_snowflake_gen.clone())
+            .app_data(channel_snowflake_gen.clone())
+            .app_data(message_snowflake_gen.clone())
+            .app_data(guild_member_snowflake_gen.clone())
+            .app_data(guild_member_role_snowflake_gen.clone())
+            .configure(api::init_routes)
             .wrap(Logger::new(
                 "From %a with %{User-Agent}i | %r => Took %Dms with %s status and %b bytes",
             ))
@@ -56,7 +94,10 @@ fn init_tracing() -> tracing_appender::non_blocking::WorkerGuard {
     tracing::subscriber::set_global_default(
         tracing_subscriber::fmt::Subscriber::builder()
             // subscriber configuration
-            .with_env_filter(&dotenvy::var("LOG_LEVEL").unwrap_or("info,server=trace".to_string()))
+            .with_env_filter(
+                &dotenvy::var("LOG_LEVEL")
+                    .unwrap_or("info,server=trace,database=trace".to_string()),
+            )
             .finish()
             // add additional writers
             .with(file_writer_subscriber.with_writer(file_writer)),

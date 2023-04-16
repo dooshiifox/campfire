@@ -5,5 +5,6 @@ pub use crate::{
     time, validation, DbPool,
 };
 pub(crate) use rand::{seq::IteratorRandom, Rng};
-pub(crate) use serde::{Deserialize, Serialize, Serializer};
+pub(crate) use serde::{Deserialize, Deserializer, Serialize, Serializer};
+#[allow(unused_imports)]
 pub(crate) use tracing::{debug, error, info, info_span, trace, warn};

@@ -1,32 +1,25 @@
 use crate::prelude::*;
 use std::collections::HashSet;
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct User {
+    pub id: Snowflake,
+    pub username: String,
+    pub discrim: i16,
+    /// The user's profile image id.
+    /// To get a users profile image, query `cdn:/users/:user_id/pfp/:profile_img_id.png`
+    pub profile_img_id: Option<i64>,
+    pub accent_color: Option<String>,
+    pub pronouns: Option<String>,
+    pub bio: Option<String>,
+}
+
 /// An interface for interacting with the `users` table of the database.
-pub struct User<'a> {
+pub struct UserTable<'a> {
     pub(crate) conn: &'a sqlx::Pool<sqlx::Postgres>,
 }
 
-#[derive(Debug, thiserror::Error)]
-pub enum NewUserError {
-    #[error("The email address is already taken")]
-    EmailTaken,
-    #[error("All the username + discriminator combos are already taken")]
-    AllDiscriminatorsUsed,
-    #[error("The entry was not inserted into the database")]
-    NotInserted,
-    #[error("An error occurred while querying the database")]
-    DatabaseError(#[from] sqlx::Error),
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum LoginError {
-    #[error("The credentials were not correct")]
-    InvalidCredentials,
-    #[error("An error occurred while querying the database")]
-    DatabaseError(#[from] sqlx::Error),
-}
-
-impl<'a> User<'a> {
+impl<'a> UserTable<'a> {
     /// Registers a user's account.
     pub async fn register<'pw, P: Into<password::Password<'pw>>>(
         &self,
@@ -116,4 +109,24 @@ impl<'a> User<'a> {
             Err(LoginError::InvalidCredentials)
         }
     }
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum NewUserError {
+    #[error("The email address is already taken")]
+    EmailTaken,
+    #[error("All the username + discriminator combos are already taken")]
+    AllDiscriminatorsUsed,
+    #[error("The entry was not inserted into the database")]
+    NotInserted,
+    #[error("An error occurred while querying the database")]
+    DatabaseError(#[from] sqlx::Error),
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum LoginError {
+    #[error("The credentials were not correct")]
+    InvalidCredentials,
+    #[error("An error occurred while querying the database")]
+    DatabaseError(#[from] sqlx::Error),
 }

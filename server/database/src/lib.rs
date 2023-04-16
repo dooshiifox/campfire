@@ -19,14 +19,34 @@ impl std::ops::Deref for DbPool {
 }
 
 impl DbPool {
-    /// Shorthand method for creating a [`user::User`] object
-    pub fn user(&self) -> user::User {
-        user::User { conn: &self.0 }
+    /// Creates a [`user::UserTable`] interface
+    pub fn user(&self) -> user::UserTable {
+        user::UserTable { conn: &self.0 }
     }
 
-    /// Shorthand method for creating a [`access_token::AccessToken`] object
-    pub fn access_token(&self) -> access_token::AccessToken {
-        access_token::AccessToken { conn: &self.0 }
+    /// Creates a [`access_token::AccessTokenTable`] interface
+    pub fn access_token(&self) -> access_token::AccessTokenTable {
+        access_token::AccessTokenTable { conn: &self.0 }
+    }
+
+    /// Creates a [`guild::GuildTable`] interface
+    pub fn guild(&self) -> guild::GuildTable {
+        guild::GuildTable { conn: &self.0 }
+    }
+
+    // /// Creates a [`role::RoleTable`] interface
+    // pub fn role(&self) -> role::Role {
+    //     role::Role { conn: &self.0 }
+    // }
+
+    /// Creates a [`channel::ChannelTable`] interface
+    pub fn channel(&self) -> channel::ChannelTable {
+        channel::ChannelTable { conn: &self.0 }
+    }
+
+    /// Creates a [`message::MessageTable`] interface
+    pub fn message(&self) -> message::MessageTable {
+        message::MessageTable { conn: &self.0 }
     }
 }
 

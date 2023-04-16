@@ -1,4 +1,4 @@
-use crate::v1::prelude::*;
+use crate::prelude::*;
 
 #[derive(Deserialize, Debug)]
 pub struct RegisterParams {
@@ -36,19 +36,17 @@ pub async fn register(
     user_sfgen: Data<Mutex<UserSnowflakeGen>>,
     db: Data<DbPool>,
 ) -> impl Responder {
-    let params = req.into_inner();
-
-    if !validation::validate_username(&params.username) {
+    if !validation::validate_username(&req.username) {
         return err!(INVALID_USERNAME);
     }
 
-    if !validation::validate_email(&params.email) {
+    if !validation::validate_email(&req.email) {
         return err!(INVALID_EMAIL);
     }
 
     // Validate the password
-    let password = password::Password::new(&params.password);
-    if let Err(e) = password.validate(&params.username, &params.email) {
+    let password = password::Password::new(&req.password);
+    if let Err(e) = password.validate(&req.username, &req.email) {
         return match e {
             password::PasswordError::TooShort => err!(SHORT_PASSWORD),
             password::PasswordError::TooLong => err!(LONG_PASSWORD),
@@ -62,7 +60,7 @@ pub async fn register(
     let user_id = { user_sfgen.lock().await.generate() };
     match db
         .user()
-        .register(user_id, &params.username, password, &params.email)
+        .register(user_id, &req.username, password, &req.email)
         .await
     {
         Ok(()) => ok!(format!("Created u:{user_id}")),
@@ -71,14 +69,14 @@ pub async fn register(
         Err(user::NewUserError::NotInserted) => {
             warn!(
                 "Register error: User not inserted into database: {user_id} / {} / {}",
-                params.username, params.email
+                req.username, req.email
             );
             err!(INTERNAL_SERVER_ERROR => ISE)
         }
         Err(user::NewUserError::DatabaseError(e)) => {
             error!(
                 "Register error: Database error: {} / {user_id} / {} / {}",
-                e, params.username, params.email
+                e, req.username, req.email
             );
             err!(INTERNAL_SERVER_ERROR => ISE)
         }

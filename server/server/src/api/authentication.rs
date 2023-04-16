@@ -1,6 +1,6 @@
 //! A middleware to check if a user is authenticated.
 
-use crate::v1::prelude::*;
+use crate::prelude::*;
 use actix_web::{
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
     Error, HttpMessage,

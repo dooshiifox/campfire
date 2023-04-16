@@ -20,6 +20,88 @@
     },
     "query": "SELECT discrim FROM users WHERE username = $1"
   },
+  "0967fd86ae7419dd03d7efe95e56291491ff81c47dae4ea1fdd46f20c88d4c01": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "channel_id",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "author_id",
+          "ordinal": 2,
+          "type_info": "Int8"
+        },
+        {
+          "name": "content",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 4,
+          "type_info": "Int8"
+        },
+        {
+          "name": "username",
+          "ordinal": 5,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "discrim",
+          "ordinal": 6,
+          "type_info": "Int2"
+        },
+        {
+          "name": "profile_img_id",
+          "ordinal": 7,
+          "type_info": "Int8"
+        },
+        {
+          "name": "accent_color",
+          "ordinal": 8,
+          "type_info": "Bpchar"
+        },
+        {
+          "name": "pronouns",
+          "ordinal": 9,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "bio",
+          "ordinal": 10,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT m.id, m.channel_id, m.author_id, m.content, m.updated_at, u.username, u.discrim, u.profile_img_id, u.accent_color, u.pronouns, u.bio FROM messages m LEFT JOIN users u ON m.author_id = u.id WHERE m.channel_id = $1 ORDER BY m.id DESC LIMIT $2 OFFSET $3"
+  },
   "0b989dea7102d80b89cf59a613f1fdf4ceba930b06bcda0bcd7b0cff5cf53abd": {
     "describe": {
       "columns": [],
@@ -35,6 +117,26 @@
       }
     },
     "query": "INSERT INTO messages (id, channel_id, author_id, content, updated_at) VALUES ($1, $2, $3, $4, $5)"
+  },
+  "14ff1ab69855c8f5ebc0b8eb7ac48a916a8a5b3901ba41b80984cf5911d54ce1": {
+    "describe": {
+      "columns": [
+        {
+          "name": "max",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT MAX(\"order\") FROM channels WHERE guild_id = $1"
   },
   "1860915af47291fe425dd536ade0db4b8b18bc6083efcb685152ca5f740456bb": {
     "describe": {
@@ -130,7 +232,7 @@
     },
     "query": "INSERT INTO guild_members (id, guild_id, user_id) VALUES ($1, $2, $3)"
   },
-  "748e5fcaca9478abac4f88249e9f5def60c3801c936751b8ec2ff94f3c919a54": {
+  "83b70cc7a29969fc108115d5c9e2b443cb8cc40a48506ea4c1b31f878f356222": {
     "describe": {
       "columns": [],
       "nullable": [],
@@ -138,13 +240,53 @@
         "Left": [
           "Int8",
           "Int8",
+          "Varchar",
+          "Int4"
+        ]
+      }
+    },
+    "query": "INSERT INTO channels (id, guild_id, name, \"order\") VALUES ($1, $2, $3, $4)"
+  },
+  "8a3a9280c98164f6c41df62c340c37249c3e073444a053595ef66c082ac7ef8d": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
           "Int8"
         ]
       }
     },
-    "query": "UPDATE channels SET next = $1 WHERE next = $2 AND id != $3"
+    "query": "UPDATE guild_members SET \"order\" = \"order\" + 1 WHERE id != $1 AND user_id = $2"
   },
-  "962f4ae79bf3e10d96a5b5c0b7a3e66bf56087581455f113527aa8fd22c83422": {
+  "8c61b8b5751660c3902a4d8873ac460ecbe5e957f16e351294ecd5c9b2320525": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "owner_id",
+          "ordinal": 1,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n            SELECT id, owner_id\n            FROM guilds\n            WHERE guilds.id = $1\n            "
+  },
+  "9e1ddd245bfc47374888e27afef0fbcf4577dba39562b8c552caf5afd456e945": {
     "describe": {
       "columns": [
         {
@@ -163,12 +305,20 @@
         ]
       }
     },
-    "query": "SELECT EXISTS(SELECT 1 FROM channels WHERE id = $1 AND guild_id = $2)"
+    "query": "SELECT EXISTS(SELECT 1 FROM channels WHERE id = $1 AND guild_id IN (SELECT guild_id FROM guild_members WHERE user_id = $2))"
   },
-  "985bccb6c7f19c88c3eefc545f321c910b9bd95d721ea8c03ef30bbafc592daf": {
+  "b054a85599d47351af2f04ef7f27c64bcbec30a1a45cdfc6e39ccfe3e5af30ec": {
     "describe": {
-      "columns": [],
-      "nullable": [],
+      "columns": [
+        {
+          "name": "order",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false
+      ],
       "parameters": {
         "Left": [
           "Int8",
@@ -176,7 +326,7 @@
         ]
       }
     },
-    "query": "UPDATE guild_members SET next = $1 WHERE next IS NULL AND user_id = $2"
+    "query": "SELECT \"order\" FROM channels WHERE id = $1 AND guild_id = $2"
   },
   "c594d495a33f41a9d3a3fd7cee6cfd96a849b0a794f1869f7673628a8e253c16": {
     "describe": {
@@ -194,20 +344,99 @@
     },
     "query": "INSERT INTO users (id, username, discrim, phc, email) VALUES ($1, $2, $3, $4, $5)"
   },
-  "cd0dada5a2d8c1d541bd4ededd40baa474c00cda9ff7333595fa7eb93198f027": {
+  "e0c23fce53b9e06974c6b204ca3d7258210688b4e59d7289e3f2fe9b7b668965": {
     "describe": {
       "columns": [],
       "nullable": [],
       "parameters": {
         "Left": [
           "Int8",
-          "Int8",
-          "Varchar",
+          "Int4",
           "Int8"
         ]
       }
     },
-    "query": "INSERT INTO channels (id, guild_id, name, next) VALUES ($1, $2, $3, $4)"
+    "query": "UPDATE channels SET \"order\" = \"order\" + 1 WHERE guild_id = $1 AND \"order\" >= $2 AND id != $3"
+  },
+  "e3efc9ff42d561c2462da858f7535e813e8407e09cdfd531dbda059908d451f5": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "owner_id",
+          "ordinal": 2,
+          "type_info": "Int8"
+        },
+        {
+          "name": "owner_username",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "owner_discrim",
+          "ordinal": 4,
+          "type_info": "Int2"
+        },
+        {
+          "name": "owner_profile_img_id",
+          "ordinal": 5,
+          "type_info": "Int8"
+        },
+        {
+          "name": "owner_accent_color",
+          "ordinal": 6,
+          "type_info": "Bpchar"
+        },
+        {
+          "name": "owner_pronouns",
+          "ordinal": 7,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "owner_bio",
+          "ordinal": 8,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "channel_id",
+          "ordinal": 9,
+          "type_info": "Int8"
+        },
+        {
+          "name": "channel_name",
+          "ordinal": 10,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n            SELECT\n                g.id,\n                g.name,\n                g.owner_id,\n                u.username as owner_username,\n                u.discrim as owner_discrim,\n                u.profile_img_id as owner_profile_img_id,\n                u.accent_color as owner_accent_color,\n                u.pronouns as owner_pronouns,\n                u.bio as owner_bio,\n                c.id as channel_id,\n                c.name as channel_name\n            FROM\n                guilds g\n                INNER JOIN users u ON g.owner_id = u.id\n                INNER JOIN channels c ON g.id = c.guild_id\n                INNER JOIN guild_members gm ON g.id = gm.guild_id\n            WHERE\n                g.id IN (\n                    SELECT\n                        guild_id\n                    FROM\n                        guild_members\n                    WHERE\n                        user_id = $1\n                )\n            ORDER BY\n                gm.order,\n                c.order\n            "
   },
   "e643301bc311481e9ce06d40a8f4bb857e4ebacd45379b8b5a062bfbcf31d9c8": {
     "describe": {

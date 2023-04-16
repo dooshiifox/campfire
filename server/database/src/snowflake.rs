@@ -86,9 +86,9 @@ impl SnowflakeGenerator {
 /// - 11 bits for the increment.
 #[derive(Debug, Clone, Copy, Eq, Ord)]
 pub struct Snowflake {
-    timestamp: u64,
-    machine_id: u16,
-    increment: u16,
+    pub timestamp: u64,
+    pub machine_id: u16,
+    pub increment: u16,
 }
 impl Snowflake {
     /// Creates a new [`Snowflake`] from a number.
@@ -135,6 +135,14 @@ impl Serialize for Snowflake {
         serializer.serialize_i64(self.into_number())
     }
 }
+impl<'de> Deserialize<'de> for Snowflake {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Ok(Self::from_number(i64::deserialize(deserializer)?))
+    }
+}
 impl From<Snowflake> for i64 {
     fn from(snowflake: Snowflake) -> Self {
         snowflake.into_number()
@@ -143,5 +151,15 @@ impl From<Snowflake> for i64 {
 impl From<i64> for Snowflake {
     fn from(number: i64) -> Self {
         Self::from_number(number)
+    }
+}
+impl From<Snowflake> for u64 {
+    fn from(snowflake: Snowflake) -> Self {
+        snowflake.into_number() as u64
+    }
+}
+impl From<u64> for Snowflake {
+    fn from(number: u64) -> Self {
+        Self::from_number(number as i64)
     }
 }

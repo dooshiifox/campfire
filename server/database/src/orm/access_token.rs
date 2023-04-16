@@ -14,7 +14,7 @@ use crate::prelude::*;
 use jsonwebtoken::{encode, DecodingKey, EncodingKey, Header};
 
 /// An interface for interacting with the `access_tokens` table of the database.
-pub struct AccessToken<'a> {
+pub struct AccessTokenTable<'a> {
     pub(crate) conn: &'a sqlx::Pool<sqlx::Postgres>,
 }
 
@@ -60,27 +60,7 @@ impl Auth {
     }
 }
 
-#[derive(Debug, thiserror::Error)]
-pub enum CreateError {
-    #[error("The JSON web token could not be encoded")]
-    JwtEncoding(#[from] jsonwebtoken::errors::Error),
-    #[error("The entry was not inserted into the database")]
-    NotInserted,
-    #[error("An error occurred while querying the database")]
-    DatabaseError(#[from] sqlx::Error),
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum CheckError {
-    #[error("The JSON web token is invalid (expired or never existed)")]
-    InvalidToken,
-    #[error("The JSON web token could not be decoded")]
-    JwtDecoding(#[from] jsonwebtoken::errors::Error),
-    #[error("An error occurred while querying the database")]
-    DatabaseError(#[from] sqlx::Error),
-}
-
-impl<'a> AccessToken<'a> {
+impl<'a> AccessTokenTable<'a> {
     /// Inserts a new access token for the given user and returns the JWT.
     pub async fn create(&self, user_id: Snowflake) -> Result<String, CreateError> {
         let token = rand::thread_rng().gen_range(0..i64::MAX);
@@ -126,4 +106,24 @@ impl<'a> AccessToken<'a> {
         row.map(|row| (row.user_id.into(), token))
             .ok_or(CheckError::InvalidToken)
     }
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum CreateError {
+    #[error("The JSON web token could not be encoded")]
+    JwtEncoding(#[from] jsonwebtoken::errors::Error),
+    #[error("The entry was not inserted into the database")]
+    NotInserted,
+    #[error("An error occurred while querying the database")]
+    DatabaseError(#[from] sqlx::Error),
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum CheckError {
+    #[error("The JSON web token is invalid (expired or never existed)")]
+    InvalidToken,
+    #[error("The JSON web token could not be decoded")]
+    JwtDecoding(#[from] jsonwebtoken::errors::Error),
+    #[error("An error occurred while querying the database")]
+    DatabaseError(#[from] sqlx::Error),
 }
