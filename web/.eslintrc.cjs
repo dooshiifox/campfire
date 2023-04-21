@@ -16,5 +16,24 @@ module.exports = {
 		browser: true,
 		es2017: true,
 		node: true
+	},
+	rules: {
+		"@typescript-eslint/no-inferrable-types": "off",
+		// enforce boolean conditions
+		'@typescript-eslint/strict-boolean-expressions': 'error'
+		// '@typescript-eslint/strict-boolean-expressions': [
+		// 	'error',
+		// 	{
+		// 		allowNullable: false,
+		// 		allowString: false,
+		// 		allowNumber: false,
+		// 		allowNullableObject: false,
+		// 		allowNullableBoolean: false,
+		// 		allowNullableString: false,
+		// 		allowNullableNumber: false,
+		// 		allowNullableEnum: false,
+		// 		allowAny: false
+		// 	}
+		// ]
 	}
 };

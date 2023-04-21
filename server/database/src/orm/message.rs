@@ -24,6 +24,18 @@ impl<'a> MessageTable<'a> {
         author: Snowflake,
         message: &str,
     ) -> Result<(), CreateError> {
+        // Check the user has permissions to send into this channel
+        match (channel::ChannelTable { conn: self.conn }
+            .has_write_permission(channel, author)
+            .await)
+        {
+            Err(channel::HasWritePermissionError::NotFound) => return Err(CreateError::NotFound),
+            Err(channel::HasWritePermissionError::DatabaseError(e)) => {
+                return Err(CreateError::DatabaseError(e))
+            }
+            Ok(()) => {}
+        };
+
         let success = sqlx::query!(
             "INSERT INTO messages (id, channel_id, author_id, content, updated_at) VALUES ($1, $2, $3, $4, $5)",
             id.into_number(),
@@ -62,19 +74,19 @@ impl<'a> MessageTable<'a> {
         Ok(messages
             .into_iter()
             .map(|message| Message {
-                id: Snowflake::from_number(message.id),
-                channel_id: Snowflake::from_number(message.channel_id),
+                id: message.id.into(),
+                channel_id: message.channel_id.into(),
                 author: user::User {
-                    id: Snowflake::from_number(message.author_id),
+                    id: message.author_id.into(),
                     username: message.username,
                     discrim: message.discrim,
-                    profile_img_id: message.profile_img_id,
+                    profile_img_id: message.profile_img_id.map(|id| id.into()),
                     accent_color: message.accent_color,
                     pronouns: message.pronouns,
                     bio: message.bio,
                 },
                 content: message.content,
-                sent_at: Snowflake::from_number(message.id).timestamp,
+                sent_at: Snowflake::from_number(message.id as u64).timestamp,
                 updated_at: message.updated_at as u64,
             })
             .collect())
@@ -83,6 +95,8 @@ impl<'a> MessageTable<'a> {
 
 #[derive(Debug, thiserror::Error)]
 pub enum CreateError {
+    #[error("The channel does not exist or the user does not have permission to view it")]
+    NotFound,
     #[error("The entry was not inserted into the database")]
     NotInserted,
     #[error("An error occurred while querying the database")]

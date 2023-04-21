@@ -14,6 +14,8 @@ pub struct SendResponse {
 pub const MESSAGE_TOO_SHORT: &str = "MessageTooShort";
 /// The message was too long (over 10000 characters)
 pub const MESSAGE_TOO_LONG: &str = "MessageTooLong";
+/// The channel was not found or the user did not have permission to view it.
+pub const CHANNEL_NOT_FOUND: &str = "ChannelNotFound";
 
 pub async fn send(
     channel_id: web::Path<Snowflake>,
@@ -41,6 +43,9 @@ pub async fn send(
         .await
     {
         Ok(()) => {}
+        Err(message::CreateError::NotFound) => {
+            return err!(CHANNEL_NOT_FOUND);
+        }
         Err(message::CreateError::NotInserted) => {
             warn!("Message not inserted into database");
             return err!(INTERNAL_SERVER_ERROR => ISE);

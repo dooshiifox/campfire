@@ -21,11 +21,15 @@ pub use thiserror::Error;
 pub use tokio::sync::Mutex;
 pub use tracing::{debug, error, info, info_span, trace, warn};
 
-pub const ISE: &'static str = "ISE";
+pub const ISE: &'static str = "InternalServerError";
 pub const NOT_FOUND: &'static str = "EndpointNotFound";
+/// The request method was not valid for the endpoint
 pub const METHOD_NOT_ALLOWED: &'static str = "MethodNotAllowed";
+/// The request was missing the authorization header
 pub const NO_AUTH_TOKEN: &'static str = "NoAuthToken";
+/// Could not decode the JWT
 pub const BAD_AUTH_TOKEN: &'static str = "BadAuthToken";
+/// The toklen does not exist. This could also mean the session has expired.
 pub const INVALID_AUTH_TOKEN: &'static str = "InvalidAuthToken";
 pub const JSON_PAYLOAD_TOO_LARGE: &'static str = "JSON:PayloadTooLarge";
 pub const JSON_INVALID_CONTENT_TYPE: &'static str = "JSON:InvalidContentType";

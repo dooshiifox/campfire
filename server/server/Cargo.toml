@@ -22,6 +22,7 @@ pin-project-lite = "0.2.9"
 futures-core = "0.3.28"
 bytes = "1.4.0"
 time = "0.3.20"
+actix-cors = "0.6.4"
 
 # TODO: Look into adding compression in production but not development
 # `zstd` increases compile times because it has a build script (has bindings to C i think)

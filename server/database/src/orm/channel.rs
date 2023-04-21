@@ -98,6 +98,25 @@ impl<'a> ChannelTable<'a> {
             _ => Ok(()),
         }
     }
+
+    pub async fn has_write_permission(
+        &self,
+        channel_id: Snowflake,
+        user_id: Snowflake,
+    ) -> Result<(), HasWritePermissionError> {
+        let channel = sqlx::query!(
+            "SELECT EXISTS(SELECT 1 FROM channels WHERE id = $1 AND guild_id IN (SELECT guild_id FROM guild_members WHERE user_id = $2))",
+            channel_id.into_number(),
+            user_id.into_number()
+        )
+        .fetch_one(self.conn)
+        .await?;
+
+        match channel.exists {
+            Some(false) | None => Err(HasWritePermissionError::NotFound),
+            _ => Ok(()),
+        }
+    }
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -112,6 +131,14 @@ pub enum CreateError {
 
 #[derive(Debug, thiserror::Error)]
 pub enum HasReadPermissionError {
+    #[error("The channel does not exist or the user does not have permission to view it")]
+    NotFound,
+    #[error("An error occurred while querying the database")]
+    DatabaseError(#[from] sqlx::Error),
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum HasWritePermissionError {
     #[error("The channel does not exist or the user does not have permission to view it")]
     NotFound,
     #[error("An error occurred while querying the database")]

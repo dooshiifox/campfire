@@ -60,6 +60,8 @@ async fn main() -> std::io::Result<()> {
     let port = 8080;
     info!("Starting server on {ip}:{port}");
     HttpServer::new(move || {
+        let cors = actix_cors::Cors::permissive();
+
         App::new()
             .app_data(pool.clone())
             .app_data(user_snowflake_gen.clone())
@@ -70,6 +72,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(guild_member_snowflake_gen.clone())
             .app_data(guild_member_role_snowflake_gen.clone())
             .configure(api::init_routes)
+            .wrap(cors)
             .wrap(Logger::new(
                 "From %a with %{User-Agent}i | %r => Took %Dms with %s status and %b bytes",
             ))

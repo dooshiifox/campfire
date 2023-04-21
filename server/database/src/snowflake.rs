@@ -84,6 +84,10 @@ impl SnowflakeGenerator {
 /// - 42 bits for the (utc) timestamp with the epoch at 2023-01-01T00:00:00Z
 /// - 10 bits for the worker ID
 /// - 11 bits for the increment.
+///
+/// # Implementation Notes
+///
+/// Serializes to a string, but deserializes from a number or a string.
 #[derive(Debug, Clone, Copy, Eq, Ord)]
 pub struct Snowflake {
     pub timestamp: u64,
@@ -92,7 +96,7 @@ pub struct Snowflake {
 }
 impl Snowflake {
     /// Creates a new [`Snowflake`] from a number.
-    pub fn from_number(number: i64) -> Self {
+    pub fn from_number(number: u64) -> Self {
         Self {
             timestamp: (number >> 21) as u64,
             machine_id: ((number >> 11) & 0b1111111111) as u16,
@@ -132,7 +136,7 @@ impl Hash for Snowflake {
 }
 impl Serialize for Snowflake {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        serializer.serialize_i64(self.into_number())
+        serializer.serialize_str(&self.to_string())
     }
 }
 impl<'de> Deserialize<'de> for Snowflake {
@@ -140,7 +144,37 @@ impl<'de> Deserialize<'de> for Snowflake {
     where
         D: Deserializer<'de>,
     {
-        Ok(Self::from_number(i64::deserialize(deserializer)?))
+        // Try deserialize as a number, then attempt as a string, then return
+        // an error if neither work.
+
+        struct SnowflakeVisitor;
+
+        impl<'de> serde::de::Visitor<'de> for SnowflakeVisitor {
+            type Value = Snowflake;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                formatter.write_str(
+                    "a snowflake (64-bit signed number or string containing 64-bit signed number)",
+                )
+            }
+
+            // fn visit_u64<E: serde::de::Error>(self, value: u64) -> Result<Self::Value, E> {
+            //     Ok(Snowflake::from_number(value))
+            // }
+
+            fn visit_str<E: serde::de::Error>(self, value: &str) -> Result<Self::Value, E> {
+                value.parse().map(Snowflake::from_number).map_err(|_| {
+                    serde::de::Error::custom(format!(
+                        "could not parse `{value}` as 64-bit signed number"
+                    ))
+                })
+            }
+        }
+
+        // This would be all good if it weren't for actix-web's Path deserializer
+        // which doesn't support `any`.
+        // deserializer.deserialize_any(SnowflakeVisitor)
+        deserializer.deserialize_str(SnowflakeVisitor)
     }
 }
 impl From<Snowflake> for i64 {
@@ -150,7 +184,7 @@ impl From<Snowflake> for i64 {
 }
 impl From<i64> for Snowflake {
     fn from(number: i64) -> Self {
-        Self::from_number(number)
+        Self::from_number(number as u64)
     }
 }
 impl From<Snowflake> for u64 {
@@ -160,6 +194,6 @@ impl From<Snowflake> for u64 {
 }
 impl From<u64> for Snowflake {
     fn from(number: u64) -> Self {
-        Self::from_number(number as i64)
+        Self::from_number(number)
     }
 }

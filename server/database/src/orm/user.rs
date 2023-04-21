@@ -8,7 +8,7 @@ pub struct User {
     pub discrim: i16,
     /// The user's profile image id.
     /// To get a users profile image, query `cdn:/users/:user_id/pfp/:profile_img_id.png`
-    pub profile_img_id: Option<i64>,
+    pub profile_img_id: Option<Snowflake>,
     pub accent_color: Option<String>,
     pub pronouns: Option<String>,
     pub bio: Option<String>,
