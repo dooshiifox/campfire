@@ -40,7 +40,7 @@ export interface Guild {
 export interface User {
     id: Snowflake;
     username: string;
-    discriminator: number;
+    discrim: number;
     profile_img_id: Snowflake | null;
     accent_color: string | null;
     pronouns: string | null;

@@ -2,6 +2,7 @@ import type { I18n } from "$/i18n";
 
 export const uwu: I18n = {
     "EMPTY": "",
+    "TRANSLATION_NOT_FOUND": "couldn't uwuify for '{key}'??? uwu",
     "ERROR": "!!!!!!!!!!!!!",
     "WARNING": "oh noez",
     "INFO": "letter 4 u",
@@ -13,10 +14,10 @@ export const uwu: I18n = {
     "LOGOUT": "bye bye!",
     "LOGGED_IN_AS": "you is {user}#{discrim}",
 
-    "DATE_FORMAT_TODAY": "today @ {HH}:{MM} {AMPM}",
-    "DATE_FORMAT_YESTERDAY": "yesterday @ {HH}:{MM} {AMPM}",
-    "DATE_FORMAT": "{yyyy}/{mm}/{dd} {HH}:{MM} {AMPM}",
-    "DATE_FORMAT_LONG": "{yyyy}/{mm}/{dd} {24HH}:{MM}:{SS}",
+    "DATE_FORMAT_TODAY": "today @ {24HH}:{MM}",
+    "DATE_FORMAT_YESTERDAY": "yesterday @ {24HH}:{MM}",
+    "DATE_FORMAT": "{yyyy}/{mm}/{dd} {24HH}:{MM}",
+    "DATE_FORMAT_LONG": "{mmmm} {d} in {yyyy} att {24HH}:{MM}:{SS}",
     "MONTH_JAN": "jan",
     "MONTH_FEB": "fab",
     "MONTH_MAR": "mar",

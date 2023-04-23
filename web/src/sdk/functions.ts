@@ -7,7 +7,7 @@ export function guildIcon(guild: Type.Guild, size: ImgSize = 64): string {
     // return `http://localhost:8080/cdn/`;
 }
 
-export function profileImage(user: Type.User, size: ImgSize = 64): string {
+export function profileImage(user?: Type.User, size: ImgSize = 64): string {
     return "";
     // return `http://localhost:8080/cdn/`;
 }

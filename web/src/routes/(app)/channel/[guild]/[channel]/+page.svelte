@@ -2,8 +2,9 @@
 	import { i18n } from '$/i18n';
 	import { Helper, Message } from '$/sdk';
 	import { page } from '$app/stores';
-	import { accessToken, guilds, messageDraft } from '$/state';
+	import { user, guilds, messageDraft } from '$/state';
 	import { i18nDateFormats } from '$/utils/date';
+	import UserInfo from '$/components/UserInfo.svelte';
 
 	$: guild = $guilds?.find((v) => v.id === $page.params.guild);
 	$: channel = guild?.channels?.find((v) => v.id === $page.params.channel);
@@ -14,20 +15,22 @@
 	let messages: Promise<Message.GetResponse | undefined>;
 	$: messages = Promise.resolve(undefined);
 	async function fetchMessages() {
-		messages = Message.get($accessToken, {
+		if (!$user) return;
+		messages = Message.get($user.accessToken, {
 			channelId: $page.params.channel
 		})
 			.emptyOnError()
 			.send();
 	}
 	$: {
-		$accessToken;
+		$user;
 		$page.params.channel;
 		fetchMessages();
 	}
 
 	async function sendMessage() {
-		const messageIdPromise = Message.send($accessToken, {
+		if (!$user) return;
+		const messageIdPromise = Message.send($user.accessToken, {
 			channelId: $page.params.channel,
 			content: $draftMessage
 		})
@@ -52,7 +55,7 @@
 		const todayAtMidnight = Math.floor(Date.now() / 86400000);
 		if (todayAtMidnight === dateAtMidnight) {
 			return i18n('DATE_FORMAT_TODAY', i18nDateFormats(date));
-		} else if (todayAtMidnight - 86400000 === dateAtMidnight) {
+		} else if (todayAtMidnight - 1 === dateAtMidnight) {
 			return i18n('DATE_FORMAT_YESTERDAY', i18nDateFormats(date));
 		} else {
 			return i18n('DATE_FORMAT', i18nDateFormats(date));
@@ -61,10 +64,10 @@
 </script>
 
 <div class="flex w-60 shrink-0 flex-col border-r border-zinc-900">
-	<div class="flex h-12 items-center border-b border-zinc-900 px-6">
+	<div class="flex h-12 shrink-0 items-center border-b border-zinc-900 px-6">
 		<span class="text-lg font-bold text-zinc-100">{guild?.name}</span>
 	</div>
-	<div class="mt-2 flex flex-col">
+	<div class="mt-2 flex grow flex-col overflow-scroll">
 		{#each guild?.channels || [] as channel}
 			{@const selected = channel.id === $page.params.channel}
 			<a href={`/channel/${guild?.id}/${channel.id}`} class="group px-2 py-0.5">
@@ -81,6 +84,8 @@
 			</a>
 		{/each}
 	</div>
+
+	<UserInfo />
 </div>
 
 <div class="flex h-screen grow flex-col">
@@ -115,7 +120,7 @@
 				{/each}
 			{/await}
 		</div>
-		<div class="min-h-20 shrink-0 px-4 py-4">
+		<div class="shrink-0 px-4 py-4">
 			<input
 				type="text"
 				class="h-full w-full rounded-lg bg-zinc-700 px-4 py-2 text-white ring-0 ring-transparent transition-all placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-200"

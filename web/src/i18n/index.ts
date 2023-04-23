@@ -4,6 +4,8 @@ import { uwu } from "$/i18n/lang/uwu";
 
 export type I18nKey =
     | "EMPTY"
+    // {key} - The translation key that couldn't be found
+    | "TRANSLATION_NOT_FOUND"
     | "ERROR"
     | "WARNING"
     | "INFO"
@@ -13,6 +15,8 @@ export type I18nKey =
     | "SESSION_EXPIRED"
     | "LOGIN"
     | "LOGOUT"
+    // {user} - The user's username
+    // {discrim} - The user's discriminator
     | "LOGGED_IN_AS"
     | I18nKey_Date
     | "SERVER_ERROR_FETCHING_GUILDS"
@@ -27,7 +31,12 @@ const LANGUAGES = {
 export const language = writable<keyof typeof LANGUAGES>("en");
 
 export function i18n(key: I18nKey, args: Record<string, string> = {}): string {
-    let str = LANGUAGES[get(language)][key];
+    const lang = get(language);
+    let str = LANGUAGES[lang][key];
+    if (!str) {
+        str = LANGUAGES[lang].TRANSLATION_NOT_FOUND;
+        args.key = key;
+    }
     for (const [key, value] of Object.entries(args)) {
         str = str.replace(new RegExp(`\\{${key}\\}`, "g"), value);
     }

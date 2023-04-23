@@ -11,18 +11,25 @@ pub struct LoginParams {
 
 #[derive(Serialize, Debug)]
 pub struct LoginResponse {
-    user_id: Snowflake,
     access_token: String,
+    user: user::User,
 }
 
 /// The email or password is invalid
 const INVALID_CREDENTIALS: &'static str = "InvalidCredentials";
 
 pub async fn login(req: Json<LoginParams>, db: Data<DbPool>) -> impl Responder {
-    let id = match db.user().login(&req.email, &req.password).await {
-        Ok(id) => id,
+    let user = match db.user().login(&req.email, &req.password).await {
+        Ok(user) => user,
         Err(user::LoginError::InvalidCredentials) => {
             return err!(UNAUTHORIZED => INVALID_CREDENTIALS)
+        }
+        Err(user::LoginError::UserNotFound) => {
+            warn!(
+                "User {} not found even after asserting they exist",
+                req.email
+            );
+            return err!(INTERNAL_SERVER_ERROR => ISE);
         }
         Err(user::LoginError::DatabaseError(e)) => {
             error!("Database error: {}", e);
@@ -30,7 +37,7 @@ pub async fn login(req: Json<LoginParams>, db: Data<DbPool>) -> impl Responder {
         }
     };
 
-    let jwt = match db.access_token().create(id).await {
+    let jwt = match db.access_token().create(user.id).await {
         Ok(jwt) => jwt,
         Err(access_token::CreateError::JwtEncoding(e)) => {
             error!("JWT encoding error: {}", e);
@@ -47,7 +54,7 @@ pub async fn login(req: Json<LoginParams>, db: Data<DbPool>) -> impl Responder {
     };
 
     ok!(LoginResponse {
-        user_id: id,
         access_token: jwt,
+        user
     })
 }

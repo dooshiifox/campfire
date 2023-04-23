@@ -20,6 +20,28 @@ pub struct UserTable<'a> {
 }
 
 impl<'a> UserTable<'a> {
+    pub async fn get(&self, id: Snowflake) -> Result<Option<User>, sqlx::Error> {
+        let user = sqlx::query!(
+            "SELECT id, username, discrim, profile_img_id, accent_color, pronouns, bio FROM users WHERE id = $1",
+            id.into_number()
+        )
+        .fetch_optional(self.conn)
+        .await?;
+
+        match user {
+            Some(user) => Ok(Some(User {
+                id: user.id.into(),
+                username: user.username,
+                discrim: user.discrim,
+                profile_img_id: user.profile_img_id.map(Into::<Snowflake>::into),
+                accent_color: user.accent_color,
+                pronouns: user.pronouns,
+                bio: user.bio,
+            })),
+            None => Ok(None),
+        }
+    }
+
     /// Registers a user's account.
     pub async fn register<'pw, P: Into<password::Password<'pw>>>(
         &self,
@@ -27,7 +49,7 @@ impl<'a> UserTable<'a> {
         username: &str,
         password: P,
         email: &str,
-    ) -> Result<(), NewUserError> {
+    ) -> Result<User, NewUserError> {
         // Check the email doesnt already exist
         let email_exists =
             sqlx::query_scalar!("SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)", email)
@@ -73,7 +95,7 @@ impl<'a> UserTable<'a> {
         .await?;
 
         if success.rows_affected() == 1 {
-            Ok(())
+            self.get(id).await?.ok_or(NewUserError::UserNotFound)
         } else {
             Err(NewUserError::NotInserted)
         }
@@ -84,7 +106,7 @@ impl<'a> UserTable<'a> {
         &self,
         email: &str,
         password: P,
-    ) -> Result<Snowflake, LoginError> {
+    ) -> Result<User, LoginError> {
         let user = {
             struct LoginDetails {
                 id: i64,
@@ -104,7 +126,9 @@ impl<'a> UserTable<'a> {
         // TODO: Update password if changed (due to encryption method changing)
 
         if password.into().verify(&user.phc) {
-            Ok(user.id.into())
+            self.get(user.id.into())
+                .await?
+                .ok_or(LoginError::UserNotFound)
         } else {
             Err(LoginError::InvalidCredentials)
         }
@@ -119,6 +143,8 @@ pub enum NewUserError {
     AllDiscriminatorsUsed,
     #[error("The entry was not inserted into the database")]
     NotInserted,
+    #[error("The user was not found after creating them in the database")]
+    UserNotFound,
     #[error("An error occurred while querying the database")]
     DatabaseError(#[from] sqlx::Error),
 }
@@ -127,6 +153,8 @@ pub enum NewUserError {
 pub enum LoginError {
     #[error("The credentials were not correct")]
     InvalidCredentials,
+    #[error("The user was not found even after asserting they exist")]
+    UserNotFound,
     #[error("An error occurred while querying the database")]
     DatabaseError(#[from] sqlx::Error),
 }

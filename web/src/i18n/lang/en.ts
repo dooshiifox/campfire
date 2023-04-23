@@ -2,6 +2,7 @@ import type { I18n } from "$/i18n";
 
 export const en: I18n = {
     "EMPTY": "",
+    "TRANSLATION_NOT_FOUND": "Translation not found for '{key}'",
     "ERROR": "Error",
     "WARNING": "Warning",
     "INFO": "Info",
@@ -13,10 +14,10 @@ export const en: I18n = {
     "LOGOUT": "Logout",
     "LOGGED_IN_AS": "Logged in as {user}#{discrim}",
 
-    "DATE_FORMAT_TODAY": "Today at {HH}:{MM} {AMPM}",
-    "DATE_FORMAT_YESTERDAY": "Yetserday at {HH}:{MM} {AMPM}",
-    "DATE_FORMAT": "{yyyy}/{mm}/{dd} {HH}:{MM} {AMPM}",
-    "DATE_FORMAT_LONG": "{yyyy}/{mm}/{dd} {24HH}:{MM}:{SS}",
+    "DATE_FORMAT_TODAY": "Today at {24HH}:{MM}",
+    "DATE_FORMAT_YESTERDAY": "Yetserday at {24HH}:{MM}",
+    "DATE_FORMAT": "{yyyy}/{mm}/{dd} {24HH}:{MM}",
+    "DATE_FORMAT_LONG": "{mmmm} {d}, {yyyy} at {24HH}:{MM}:{SS}",
     "MONTH_JAN": "Jan",
     "MONTH_FEB": "Feb",
     "MONTH_MAR": "Mar",
