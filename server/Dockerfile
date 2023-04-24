@@ -25,6 +25,4 @@ RUN cargo build --release --bin server
 FROM alpine AS runtime
 WORKDIR /app
 COPY --from=builder /app/target/release/server server
-COPY .env .env
-# ENTRYPOINT [ "sleep", "infinity" ]
 ENTRYPOINT [ "./server" ]
