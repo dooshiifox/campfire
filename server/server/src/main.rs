@@ -56,7 +56,7 @@ async fn main() -> std::io::Result<()> {
         snowflake::SnowflakeGenerator::new(machine_id),
     )));
 
-    let ip = "127.0.0.1";
+    let ip = "0.0.0.0";
     let port = 8080;
     info!("Starting server on {ip}:{port}");
     HttpServer::new(move || {

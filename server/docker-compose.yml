@@ -3,13 +3,32 @@ version: "3.9"
 services:
     db:
         image: postgres
-        container_name: postgres
-        restart: always
+        container_name: campfire-postgres
+        restart: unless-stopped
         environment:
+            SERVICE_NAME: db
             POSTGRES_PASSWORD: password
             POSTGRES_USER: postgres
             POSTGRES_DB: database
         ports:
-            - 5432:5432
+            - "5432:5432"
         volumes:
             - ./db-data:/var/lib/postgresql/data
+#         networks:
+#             - postgres-network
+#     server:
+#         build: .
+#         container_name: campfire-server
+#         restart: unless-stopped
+#         environment:
+#             SERVICE_NAME: server
+#         ports:
+#             - "8080:8080"
+#         depends_on:
+#             - db
+#         networks:
+#             - postgres-network
+
+# networks:
+#     postgres-network:
+#         driver: bridge

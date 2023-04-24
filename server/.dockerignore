@@ -1,0 +1,4 @@
+target/
+.env.example
+.gitignore
+log.txt

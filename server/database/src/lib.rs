@@ -53,6 +53,10 @@ impl DbPool {
 /// Create a new database pool
 pub async fn new_pool() -> Pool<Postgres> {
     dotenvy::from_path(std::path::Path::new(".env")).unwrap();
+    info!(
+        "Connecting to database: {}",
+        dotenvy::var("DATABASE_URL").unwrap()
+    );
 
     PgPoolOptions::new()
         .max_connections(12)
