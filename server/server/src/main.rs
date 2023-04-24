@@ -24,7 +24,10 @@ pub struct GuildMemberRoleSnowflakeGen(pub snowflake::SnowflakeGenerator);
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    dotenvy::from_path(std::path::Path::new(".env")).unwrap();
+    let env_path = std::path::Path::new(".env");
+    if env_path.exists() {
+        dotenvy::from_path(env_path).unwrap();
+    }
     let _guard = init_tracing(); // Hold file guard until end of program
 
     let pool = Data::new(DbPool(database::new_pool().await));

@@ -52,7 +52,10 @@ impl DbPool {
 
 /// Create a new database pool
 pub async fn new_pool() -> Pool<Postgres> {
-    dotenvy::from_path(std::path::Path::new(".env")).unwrap();
+    let env_path = std::path::Path::new(".env");
+    if env_path.exists() {
+        dotenvy::from_path(env_path).unwrap();
+    }
     info!(
         "Connecting to database: {}",
         dotenvy::var("DATABASE_URL").unwrap()

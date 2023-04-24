@@ -12,7 +12,6 @@ COPY Cargo.toml Cargo.toml
 COPY Cargo.lock Cargo.lock
 COPY .cargo .cargo
 COPY migrations migrations
-COPY .env .env
 # Create dummy src files to build dependencies
 RUN mkdir -p server/src && echo "fn main() {}" > server/src/main.rs
 RUN mkdir -p database/src && echo "fn dummy() {}" > database/src/lib.rs
