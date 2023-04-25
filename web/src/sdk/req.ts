@@ -1,4 +1,5 @@
 import { UnhandledReqError, type ApiResponse, type Handler } from "$/sdk/types";
+import { PUBLIC_ENDPOINT } from '$env/static/public';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AnyRequest = SdkRequest<any, any>;
@@ -285,7 +286,9 @@ export const fetchErrors = (req: AnyRequest) => ({
     }
 });
 
-export const endpoint = "http://localhost:8080"
+// export const endpoint = 
+// Get the `PUBLIC_ENDPOINT` value from the env
+export const endpoint = PUBLIC_ENDPOINT ?? "http://localhost:8080";
 
 export type Method = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 export async function fetchRequest<ServerResponse>(uri: string, method: Method, req?: { body?: unknown; authToken?: string }): Promise<ApiResponse<ServerResponse>> {
