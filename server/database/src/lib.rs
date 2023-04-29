@@ -61,9 +61,16 @@ pub async fn new_pool() -> Pool<Postgres> {
         dotenvy::var("DATABASE_URL").unwrap()
     );
 
-    PgPoolOptions::new()
+    let pool = PgPoolOptions::new()
         .max_connections(12)
         .connect(&dotenvy::var("DATABASE_URL").unwrap())
         .await
-        .expect("Unable to connect to database. Is it online?")
+        .expect("Unable to connect to database. Is it online?");
+
+    sqlx::migrate!("../migrations")
+        .run(&pool)
+        .await
+        .expect("Cannot run migrations.");
+
+    pool
 }

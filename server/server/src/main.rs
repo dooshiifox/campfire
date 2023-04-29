@@ -63,7 +63,11 @@ async fn main() -> std::io::Result<()> {
     let port = 8080;
     info!("Starting server on {ip}:{port}");
     HttpServer::new(move || {
-        let cors = actix_cors::Cors::permissive();
+        let cors = actix_cors::Cors::default()
+            .allow_any_origin()
+            .allow_any_method()
+            .allow_any_header()
+            .send_wildcard();
 
         App::new()
             .app_data(pool.clone())
