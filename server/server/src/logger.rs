@@ -1,5 +1,7 @@
 //! For middleware documentation, see [`Logger`].
 
+#![allow(clippy::all, clippy::pedantic, clippy::style)]
+
 use std::{
     borrow::Cow,
     collections::HashSet,
@@ -29,7 +31,7 @@ use tracing::{debug, warn};
 /// Middleware for logging request and response summaries to the terminal.
 ///
 /// This middleware uses the `log` crate to output information. Enable `log`'s output for the
-/// "actix_web" scope using [`env_logger`](https://docs.rs/env_logger) or similar crate.
+/// `actix_web` scope using [`env_logger`](https://docs.rs/env_logger) or similar crate.
 ///
 /// # Default Format
 /// The [`default`](Logger::default) Logger uses the following format:

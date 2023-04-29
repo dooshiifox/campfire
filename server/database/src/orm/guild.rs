@@ -99,7 +99,7 @@ impl<'a> GuildTable<'a> {
                         id: guild.owner_id.into(),
                         username: guild.owner_username,
                         discrim: guild.owner_discrim,
-                        profile_img_id: guild.owner_profile_img_id.map(|id| id.into()),
+                        profile_img_id: guild.owner_profile_img_id.map(Into::into),
                         accent_color: guild.owner_accent_color,
                         pronouns: guild.owner_pronouns,
                         bio: guild.owner_bio,

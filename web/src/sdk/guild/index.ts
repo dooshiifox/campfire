@@ -1,1 +1,1 @@
-export * from "./get_joined";
+export * from './get_joined';

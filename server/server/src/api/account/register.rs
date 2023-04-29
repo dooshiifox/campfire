@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[derive(Deserialize, Debug)]
-pub struct RegisterParams {
+pub struct Params {
     /// The chosen username of the new user
     username: String,
     /// The chosen password of the new user
@@ -11,34 +11,34 @@ pub struct RegisterParams {
 }
 
 #[derive(Debug, Serialize)]
-pub struct RegisterResponse {
+pub struct Response {
     access_token: String,
     user: user::User,
 }
 
 /// The username is invalid
-const INVALID_USERNAME: &'static str = "InvalidUsername";
+const INVALID_USERNAME: &str = "InvalidUsername";
 /// The username and all discriminators are already taken
-const USERNAME_TAKEN: &'static str = "UsernameTaken";
+const USERNAME_TAKEN: &str = "UsernameTaken";
 /// The email address is invalid
-const INVALID_EMAIL: &'static str = "InvalidEmail";
+const INVALID_EMAIL: &str = "InvalidEmail";
 /// The email address is already taken
-const EMAIL_TAKEN: &'static str = "EmailTaken";
+const EMAIL_TAKEN: &str = "EmailTaken";
 /// The password is too weak
-const PASSWORD_TOO_WEAK: &'static str = "PasswordTooWeak";
+const PASSWORD_TOO_WEAK: &str = "PasswordTooWeak";
 /// The password is too long
-const PASSWORD_TOO_LONG: &'static str = "PasswordTooLong";
+const PASSWORD_TOO_LONG: &str = "PasswordTooLong";
 /// The password is too short
-const PASSWORD_TOO_SHORT: &'static str = "PasswordTooShort";
+const PASSWORD_TOO_SHORT: &str = "PasswordTooShort";
 /// The password is too common
-const PASSWORD_TOO_COMMON: &'static str = "PasswordTooCommon";
+const PASSWORD_TOO_COMMON: &str = "PasswordTooCommon";
 /// The password is too similar to the username
-const PASSWORD_LIKE_USERNAME: &'static str = "PasswordLikeUsername";
+const PASSWORD_LIKE_USERNAME: &str = "PasswordLikeUsername";
 /// The password is too similar to the email address
-const PASSWORD_LIKE_EMAIL: &'static str = "PasswordLikeEmail";
+const PASSWORD_LIKE_EMAIL: &str = "PasswordLikeEmail";
 
 pub async fn register(
-    req: Json<RegisterParams>,
+    req: Json<Params>,
     user_sfgen: Data<Mutex<UserSnowflakeGen>>,
     db: Data<DbPool>,
 ) -> impl Responder {
@@ -110,7 +110,7 @@ pub async fn register(
         }
     };
 
-    ok!(RegisterResponse {
+    ok!(Response {
         access_token: jwt,
         user,
     })

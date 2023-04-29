@@ -4,21 +4,21 @@ use crate::prelude::*;
 // same username but different discriminators, and remembering your discrim
 // when needing to login sounds like a pain.
 #[derive(Deserialize, Debug)]
-pub struct LoginParams {
+pub struct Params {
     email: String,
     password: String,
 }
 
 #[derive(Serialize, Debug)]
-pub struct LoginResponse {
+pub struct Response {
     access_token: String,
     user: user::User,
 }
 
 /// The email or password is invalid
-const INVALID_CREDENTIALS: &'static str = "InvalidCredentials";
+const INVALID_CREDENTIALS: &str = "InvalidCredentials";
 
-pub async fn login(req: Json<LoginParams>, db: Data<DbPool>) -> impl Responder {
+pub async fn login(req: Json<Params>, db: Data<DbPool>) -> impl Responder {
     let user = match db.user().login(&req.email, &req.password).await {
         Ok(user) => user,
         Err(user::LoginError::InvalidCredentials) => {
@@ -53,7 +53,7 @@ pub async fn login(req: Json<LoginParams>, db: Data<DbPool>) -> impl Responder {
         }
     };
 
-    ok!(LoginResponse {
+    ok!(Response {
         access_token: jwt,
         user
     })

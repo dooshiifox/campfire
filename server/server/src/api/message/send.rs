@@ -1,12 +1,12 @@
 use crate::prelude::*;
 
 #[derive(Debug, Deserialize)]
-pub struct SendParams {
+pub struct Params {
     content: String,
 }
 
 #[derive(Serialize, Debug)]
-pub struct SendResponse {
+pub struct Response {
     message_id: Snowflake,
 }
 
@@ -19,12 +19,12 @@ pub const CHANNEL_NOT_FOUND: &str = "ChannelNotFound";
 
 pub async fn send(
     channel_id: web::Path<Snowflake>,
-    body: Json<SendParams>,
+    body: Json<Params>,
     session: Session,
     message_sfgen: Data<Mutex<MessageSnowflakeGen>>,
     db: Data<DbPool>,
 ) -> impl Responder {
-    if body.content.len() == 0 {
+    if body.content.is_empty() {
         return err!(MESSAGE_TOO_SHORT);
     }
     if body.content.len() > 10000 {
@@ -34,12 +34,7 @@ pub async fn send(
     let message_id = { message_sfgen.lock().await.generate() };
     match db
         .message()
-        .create(
-            message_id,
-            (*channel_id).into(),
-            session.user_id,
-            &body.content,
-        )
+        .create(message_id, *channel_id, session.user_id, &body.content)
         .await
     {
         Ok(()) => {}
@@ -56,5 +51,5 @@ pub async fn send(
         }
     };
 
-    ok!(SendResponse { message_id })
+    ok!(Response { message_id })
 }

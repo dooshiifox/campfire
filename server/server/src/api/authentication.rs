@@ -92,10 +92,10 @@ where
             req.extensions_mut().insert(Session { user_id, token });
 
             // Call the next service
-            let fut = service.call(req);
-            let res = fut.await?;
+            let future = service.call(req);
+            let response = future.await?;
 
-            Ok(res)
+            Ok(response)
         })
     }
 }
@@ -115,7 +115,7 @@ impl actix_web::FromRequest for Session {
         ready(
             req.extensions()
                 .get::<Session>()
-                .map(|s| s.clone())
+                .cloned()
                 .ok_or(actix_err!(INTERNAL_SERVER_ERROR => ISE "`Session` param not set, did you forget to wrap in an `AuthMiddleware`?")),
         )
     }

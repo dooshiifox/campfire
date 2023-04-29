@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[derive(Deserialize, Debug)]
-pub struct CreateParams {
+pub struct Params {
     /// Name of the channel, between 2 and 60 characters
     name: String,
     /// The channel to place this channel before
@@ -10,27 +10,27 @@ pub struct CreateParams {
 }
 
 #[derive(Serialize, Debug)]
-pub struct CreateResponse {
+pub struct Response {
     /// The ID of the created channel
     id: Snowflake,
 }
 
 /// The name was shorter than 2 character
-pub const NAME_TOO_SHORT: &'static str = "NameTooShort";
+pub const NAME_TOO_SHORT: &str = "NameTooShort";
 /// The name was longer than 60 characters
-pub const NAME_TOO_LONG: &'static str = "NameTooLong";
+pub const NAME_TOO_LONG: &str = "NameTooLong";
 /// The name did not conform to the expected style
-pub const NAME_INVALID: &'static str = "NameInvalid";
+pub const NAME_INVALID: &str = "NameInvalid";
 /// The guild was not found or the user is not in the guild
-pub const GUILD_NOT_FOUND: &'static str = "GuildNotFound";
+pub const GUILD_NOT_FOUND: &str = "GuildNotFound";
 /// The user does not have permission to create a channel
-pub const PERMISSION_DENIED: &'static str = "PermissionDenied";
+pub const PERMISSION_DENIED: &str = "PermissionDenied";
 /// The `place_before` channel does not exist
-pub const PLACE_BEFORE_NOT_FOUND: &'static str = "PlaceBeforeNotFound";
+pub const PLACE_BEFORE_NOT_FOUND: &str = "PlaceBeforeNotFound";
 
 pub async fn create(
     guild_id: web::Path<Snowflake>,
-    req: Json<CreateParams>,
+    req: Json<Params>,
     session: Session,
     channel_sfgen: Data<Mutex<ChannelSnowflakeGen>>,
     db: Data<DbPool>,
@@ -85,5 +85,5 @@ pub async fn create(
         }
     };
 
-    ok!(CreateResponse { id: channel_id })
+    ok!(Response { id: channel_id })
 }

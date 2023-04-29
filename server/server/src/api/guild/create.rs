@@ -1,24 +1,24 @@
 use crate::prelude::*;
 
 #[derive(Deserialize, Debug)]
-pub struct CreateParams {
+pub struct Params {
     /// Name of the guild, between 2 and 60 characters
     name: String,
 }
 
 #[derive(Serialize, Debug)]
-pub struct CreateResponse {
+pub struct Response {
     guild_id: Snowflake,
     channel_id: Snowflake,
 }
 
 /// The name was shorter than 2 character
-pub const NAME_TOO_SHORT: &'static str = "NameTooShort";
+pub const NAME_TOO_SHORT: &str = "NameTooShort";
 /// The name was longer than 60 characters
-pub const NAME_TOO_LONG: &'static str = "NameTooLong";
+pub const NAME_TOO_LONG: &str = "NameTooLong";
 
 pub async fn create(
-    req: Json<CreateParams>,
+    req: Json<Params>,
     session: Session,
     guild_sfgen: Data<Mutex<GuildSnowflakeGen>>,
     guild_member_sfgen: Data<Mutex<GuildMemberSnowflakeGen>>,
@@ -89,7 +89,7 @@ pub async fn create(
         }
     };
 
-    ok!(CreateResponse {
+    ok!(Response {
         guild_id,
         channel_id
     })

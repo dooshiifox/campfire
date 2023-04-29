@@ -1,5 +1,5 @@
 /// The time epoch used for the database. Equivalent to 2023-01-01T00:00:00Z.
-pub const DB_EPOCH: i64 = 1672531200000;
+pub const DB_EPOCH: i64 = 1_672_531_200_000;
 
 /// Returns the current (UTC) time in milliseconds since the database epoch.
 pub fn now() -> i64 {

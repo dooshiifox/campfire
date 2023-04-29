@@ -56,17 +56,18 @@ impl<'a> MessageTable<'a> {
 
     /// Get the messages in a channel, ordered by creation time, with a
     /// limit and offset.
+    #[allow(clippy::cast_sign_loss)]
     pub async fn get(
         &self,
         channel: Snowflake,
-        limit: u64,
-        offset: u64,
+        limit: i64,
+        offset: i64,
     ) -> Result<Vec<Message>, GetError> {
         let messages = sqlx::query!(
             "SELECT m.id, m.channel_id, m.author_id, m.content, m.updated_at, u.username, u.discrim, u.profile_img_id, u.accent_color, u.pronouns, u.bio FROM messages m LEFT JOIN users u ON m.author_id = u.id WHERE m.channel_id = $1 ORDER BY m.id DESC LIMIT $2 OFFSET $3",
             channel.into_number(),
-            limit as i64,
-            offset as i64
+            limit,
+            offset
         )
         .fetch_all(self.conn)
         .await?;
@@ -80,7 +81,7 @@ impl<'a> MessageTable<'a> {
                     id: message.author_id.into(),
                     username: message.username,
                     discrim: message.discrim,
-                    profile_img_id: message.profile_img_id.map(|id| id.into()),
+                    profile_img_id: message.profile_img_id.map(Into::into),
                     accent_color: message.accent_color,
                     pronouns: message.pronouns,
                     bio: message.bio,

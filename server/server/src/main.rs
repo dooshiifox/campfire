@@ -1,3 +1,6 @@
+#![warn(clippy::all, clippy::pedantic, clippy::style)]
+#![allow(clippy::must_use_candidate)]
+
 mod api;
 pub mod logger;
 mod macros;
@@ -6,6 +9,7 @@ pub mod prelude;
 use crate::{logger::Logger, prelude::*};
 use actix_web::{middleware::NormalizePath, App, HttpServer};
 use tokio::sync::Mutex;
+use tracing_subscriber::layer::SubscriberExt;
 
 #[derive(Deref, DerefMut)]
 pub struct UserSnowflakeGen(pub snowflake::SnowflakeGenerator);
@@ -98,15 +102,13 @@ fn init_tracing() -> tracing_appender::non_blocking::WorkerGuard {
     let file_appender = tracing_appender::rolling::never("./", "log.txt");
     let (file_writer, guard) = tracing_appender::non_blocking(file_appender);
 
-    use tracing_subscriber::layer::SubscriberExt;
     let mut file_writer_subscriber = tracing_subscriber::fmt::Layer::default();
     file_writer_subscriber.set_ansi(false);
     tracing::subscriber::set_global_default(
         tracing_subscriber::fmt::Subscriber::builder()
             // subscriber configuration
             .with_env_filter(
-                &dotenvy::var("LOG_LEVEL")
-                    .unwrap_or("info,server=trace,database=trace".to_string()),
+                dotenvy::var("LOG_LEVEL").unwrap_or("info,server=trace,database=trace".to_string()),
             )
             .finish()
             // add additional writers

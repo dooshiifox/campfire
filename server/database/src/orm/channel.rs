@@ -23,31 +23,28 @@ impl<'a> ChannelTable<'a> {
         // If `next` exists, query to find out whether it exists in the database
         // and that channel belongs to the same guild this one does.
         // Otherwise, we'll just insert this channel at the end of the list.
-        let order = match next {
-            Some(next) => {
-                let order = sqlx::query!(
-                    r#"SELECT "order" FROM channels WHERE id = $1 AND guild_id = $2"#,
-                    next.into_number(),
-                    guild.into_number()
-                )
-                .fetch_optional(self.conn)
-                .await?;
+        let order = if let Some(next) = next {
+            let order = sqlx::query!(
+                r#"SELECT "order" FROM channels WHERE id = $1 AND guild_id = $2"#,
+                next.into_number(),
+                guild.into_number()
+            )
+            .fetch_optional(self.conn)
+            .await?;
 
-                match order {
-                    Some(order) => order.order,
-                    None => return Err(CreateError::NextChannelDoesNotExist),
-                }
+            match order {
+                Some(order) => order.order,
+                None => return Err(CreateError::NextChannelDoesNotExist),
             }
-            None => {
-                let order = sqlx::query!(
-                    r#"SELECT MAX("order") FROM channels WHERE guild_id = $1"#,
-                    guild.into_number()
-                )
-                .fetch_one(self.conn)
-                .await?;
+        } else {
+            let order = sqlx::query!(
+                r#"SELECT MAX("order") FROM channels WHERE guild_id = $1"#,
+                guild.into_number()
+            )
+            .fetch_one(self.conn)
+            .await?;
 
-                order.max.unwrap_or(0) + 1
-            }
+            order.max.unwrap_or(0) + 1
         };
 
         let success = sqlx::query!(
@@ -62,7 +59,7 @@ impl<'a> ChannelTable<'a> {
 
         if success.rows_affected() != 1 {
             return Err(CreateError::NotInserted);
-        } else if let Some(_) = next {
+        } else if next.is_some() {
             // Assuming we didn't insert this channel at the end of the list,
             // we need to update the `order` columns of all the channels
             // that come after this one.

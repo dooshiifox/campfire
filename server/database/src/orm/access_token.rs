@@ -85,6 +85,7 @@ impl<'a> AccessTokenTable<'a> {
     }
 
     /// Checks a JWT and returns the user ID if it is valid.
+    /// Returns the user's ID and the access token ID.
     pub async fn check(&self, token: &str) -> Result<(Snowflake, i64), CheckError> {
         let auth = Auth::decode(token)?;
         let token = auth.tkn;

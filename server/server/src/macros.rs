@@ -46,7 +46,7 @@ macro_rules! map {
 #[macro_export]
 macro_rules! ok {
     ($code:tt => $ok:expr) => {{
-        use crate::api::ApiSuccess;
+        use $crate::api::result::ApiSuccess;
         ApiSuccess($ok).into_response(StatusCode::$code)
     }};
     ($ok:expr) => {
@@ -63,7 +63,7 @@ macro_rules! ok {
 macro_rules! err {
     // With `data` field.
     ($code:tt => $err:ident $data:expr) => {{
-        use crate::api::ApiError;
+        use $crate::api::result::ApiError;
         ApiError($err.to_string(), Some($data)).into_response(StatusCode::$code)
     }};
     ($err:ident $data:expr) => {
@@ -72,7 +72,7 @@ macro_rules! err {
 
     // No `data` field.
     ($code:tt => $err:ident) => {{
-        use crate::api::ApiError;
+        use $crate::api::result::ApiError;
         ApiError::<()>($err.to_string(), None).into_response(StatusCode::$code)
     }};
     ($err:ident) => {

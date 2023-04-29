@@ -1,3 +1,4 @@
+#![allow(clippy::module_name_repetitions)]
 use argon2::PasswordVerifier;
 
 /// Returns the global pepper secret
@@ -24,6 +25,10 @@ impl<'pw> Password<'pw> {
     }
 
     /// Validates that a password has a valid format.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`PasswordError`] if the password is not valid.
     pub fn validate(&self, _username: &str, _email: &str) -> Result<(), PasswordError> {
         if self.password.len() < 8 {
             return Err(PasswordError::TooShort);

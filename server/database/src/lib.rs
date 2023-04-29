@@ -1,3 +1,13 @@
+#![warn(clippy::all, clippy::pedantic, clippy::style)]
+#![allow(
+    clippy::must_use_candidate,
+    clippy::module_name_repetitions,
+    // sqlx can panic and I don't want to add this on to every method
+    // that makes a query.
+    clippy::missing_panics_doc,
+    clippy::missing_errors_doc
+)]
+
 pub mod orm;
 pub mod password;
 pub mod prelude;
@@ -51,6 +61,11 @@ impl DbPool {
 }
 
 /// Create a new database pool
+///
+/// # Panics
+///
+/// Panics if the database cannot be connected to or if the migrations
+/// fail to run for some reason.
 pub async fn new_pool() -> Pool<Postgres> {
     let env_path = std::path::Path::new(".env");
     if env_path.exists() {

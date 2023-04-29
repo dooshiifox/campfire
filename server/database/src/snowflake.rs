@@ -1,3 +1,9 @@
+#![allow(
+    clippy::cast_sign_loss,
+    clippy::cast_possible_wrap,
+    clippy::cast_lossless,
+    clippy::module_name_repetitions
+)]
 use crate::prelude::*;
 use std::hash::Hash;
 
@@ -28,9 +34,7 @@ impl SnowflakeGenerator {
     ///
     /// Panics if `machine_id >= 1024`.
     pub fn new(machine_id: u16) -> Self {
-        if machine_id > 0b1111111111 {
-            panic!("machine_id must be less than 1024");
-        }
+        assert!(machine_id < 1024, "machine_id must be less than 1024");
 
         Self {
             last_timestamp: 0,
@@ -57,11 +61,11 @@ impl SnowflakeGenerator {
         if self.increment_overflow != 0 {
             // We've overflowed the increment, so we need to increment the
             // timestamp by 1.
-            timestamp += self.increment_overflow as u64;
+            timestamp += u64::from(self.increment_overflow);
         }
 
         self.increment += 1;
-        if self.increment == 0b11111111111 {
+        if self.increment == 0b111_1111_1111 {
             warn!(
                 "Snowflake generator increment overflowed: {} {} {}",
                 timestamp, self.machine_id, self.increment_overflow
@@ -88,7 +92,7 @@ impl SnowflakeGenerator {
 /// # Implementation Notes
 ///
 /// Serializes to a string, but deserializes from a number or a string.
-#[derive(Debug, Clone, Copy, Eq, Ord)]
+#[derive(Debug, Clone, Copy, Eq)]
 pub struct Snowflake {
     pub timestamp: u64,
     pub machine_id: u16,
@@ -98,14 +102,16 @@ impl Snowflake {
     /// Creates a new [`Snowflake`] from a number.
     pub fn from_number(number: u64) -> Self {
         Self {
-            timestamp: (number >> 21) as u64,
-            machine_id: ((number >> 11) & 0b1111111111) as u16,
-            increment: (number & 0b11111111111) as u16,
+            timestamp: number >> 21,
+            machine_id: ((number >> 11) & 0b11_1111_1111) as u16,
+            increment: (number & 0b111_1111_1111) as u16,
         }
     }
 
     /// Returns the snowflake as an i64.
     pub fn into_number(&self) -> i64 {
+        // These casts are safe because the values are guaranteed to be within
+        // 0..2^63 until >100 years from now.
         ((self.timestamp as i64) << 21) | ((self.machine_id as i64) << 11) | (self.increment as i64)
     }
 
@@ -127,6 +133,11 @@ impl PartialEq for Snowflake {
 impl PartialOrd for Snowflake {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         self.timestamp.partial_cmp(&other.timestamp)
+    }
+}
+impl Ord for Snowflake {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.timestamp.cmp(&other.timestamp)
     }
 }
 impl Hash for Snowflake {

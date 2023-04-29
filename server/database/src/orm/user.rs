@@ -72,7 +72,7 @@ impl<'a> UserTable<'a> {
         for discrim in existing_discrims {
             discrims.remove(&discrim.discrim);
         }
-        if discrims.len() == 0 {
+        if discrims.is_empty() {
             return Err(NewUserError::AllDiscriminatorsUsed);
         }
         // Pick a random one from whats available
