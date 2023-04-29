@@ -10,7 +10,7 @@
 			email,
 			password
 		})
-			.emptyOnError()
+			.throwOnError()
 			.send();
 
 		if (login) {

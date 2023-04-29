@@ -1,3 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+	font-family: 'Sigmar';
+	src: url('/fonts/Sigmar/Regular.ttf');
+	font-weight: 400;
+	font-style: normal;
+}
